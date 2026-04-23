@@ -1,0 +1,407 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ENUMS ───────────────────────────────────────────────
+
+enum Role {
+  ADMIN
+  CUSTOMER
+  WAREHOUSE_STAFF
+}
+
+enum ShippingMethod {
+  AIR
+  SEA
+  LAND
+}
+
+enum ShipmentType {
+  PARCEL
+  LCL
+  FCL
+}
+
+enum ShipmentStatus {
+  CREATED
+  WAITING_WAREHOUSE_ARRIVAL
+  RECEIVED_AT_WAREHOUSE
+  PROCESSING
+  READY_FOR_DISPATCH
+  DISPATCHED
+  IN_TRANSIT
+  ARRIVED_AT_DESTINATION
+  CUSTOMS_CLEARANCE
+  OUT_FOR_DELIVERY
+  DELIVERED
+}
+
+enum QuotationStatus {
+  PENDING
+  REVIEWED
+  QUOTED
+  ACCEPTED
+  REJECTED
+  EXPIRED
+}
+
+// ─── USER & AUTH ─────────────────────────────────────────
+
+model User {
+  id             String   @id @default(cuid())
+  email          String   @unique
+  password       String
+  name           String
+  phone          String?
+  company        String?
+  role           Role     @default(CUSTOMER)
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  shipments      Shipment[]
+  payments       Payment[]
+  auditLogs      AuditLog[]
+  notifications  Notification[]
+  chatMessages   ChatMessage[]
+  warehouseManaged Warehouse?
+  createdTickets  SupportTicket[]  @relation("CustomerTickets")
+  assignedTickets SupportTicket[]  @relation("AssignedTickets")
+  ticketMessages  TicketMessage[]
+  quotations      Quotation[]      @relation("CustomerQuotations")
+  reviewedQuotations Quotation[]   @relation("ReviewedQuotations")
+
+  @@map("users")
+}
+
+// ─── SHIPMENTS ───────────────────────────────────────────
+
+model Shipment {
+  id                  String          @id @default(cuid())
+  shipmentId          String          @unique          // ARWA-2026-000152
+  trackingNumber      String          @unique          // ARWA-TRACK-XXXXXX
+  senderName          String
+  senderPhone         String?
+  receiverName        String
+  receiverPhone       String?
+  receiverAddress     String?
+  destinationCountry  String
+  destinationCity     String
+  weight              Float           // kg
+  length              Float?          // cm
+  width               Float?          // cm
+  height              Float?          // cm
+  productDescription  String
+  shipmentValue       Float           // USD
+  shippingMethod      ShippingMethod
+  shipmentType        ShipmentType
+  status              ShipmentStatus  @default(CREATED)
+  active              Boolean         @default(true)
+  qrCodeData          String?         // JSON string with QR data
+  notes               String?
+  customerId          String
+  warehouseId         String?
+  routeId             String?
+  estimatedDelivery   DateTime?
+  actualDelivery      DateTime?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+
+  customer            User            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  warehouse           Warehouse?      @relation(fields: [warehouseId], references: [id])
+  route               ShippingRoute?  @relation(fields: [routeId], references: [id])
+  trackingEvents      ShipmentTracking[]
+  photos              ShipmentPhoto[]
+  payments            Payment[]
+  tickets             SupportTicket[]
+
+  @@map("shipments")
+}
+
+// ─── SHIPMENT TRACKING ───────────────────────────────────
+
+model ShipmentTracking {
+  id          String          @id @default(cuid())
+  shipmentId  String
+  status      ShipmentStatus
+  location    String
+  notes       String?
+  timestamp   DateTime        @default(now())
+
+  shipment    Shipment        @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@map("shipment_tracking")
+}
+
+// ─── SHIPMENT PHOTOS ─────────────────────────────────────
+
+model ShipmentPhoto {
+  id          String   @id @default(cuid())
+  shipmentId  String
+  photoUrl    String
+  description String?
+  uploadedBy  String
+  createdAt   DateTime @default(now())
+
+  shipment    Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@map("shipment_photos")
+}
+
+// ─── WAREHOUSES ──────────────────────────────────────────
+
+model Warehouse {
+  id        String   @id @default(cuid())
+  name      String
+  city      String
+  address   String
+  capacity  Int      @default(10000)  // cubic meters
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  managerId String?  @unique
+  manager   User?    @relation(fields: [managerId], references: [id])
+  shipments Shipment[]
+
+  @@map("warehouses")
+}
+
+// ─── COUNTRIES ───────────────────────────────────────────
+
+model Country {
+  id           String   @id @default(cuid())
+  name         String
+  code         String   @unique  // ISO 3166-1 alpha-2
+  supportsAir  Boolean  @default(false)
+  supportsSea  Boolean  @default(false)
+  supportsLand Boolean  @default(false)
+  active       Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  @@map("countries")
+}
+
+// ─── SHIPPING ROUTES ─────────────────────────────────────
+
+model ShippingRoute {
+  id                  String   @id @default(cuid())
+  name                String   // e.g. "China → Saudi Arabia"
+  originCountry       String   // China
+  destinationCountry  String
+  destinationCity     String?
+  pricePerKg          Float    // USD per kg
+  estimatedDaysMin    Int      // minimum delivery days
+  estimatedDaysMax    Int      // maximum delivery days
+  allowedAir          Boolean  @default(true)
+  allowedSea          Boolean  @default(true)
+  allowedLand         Boolean  @default(false)
+  active              Boolean  @default(true)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  shipments           Shipment[]
+
+  @@map("shipping_routes")
+}
+
+// ─── AUDIT LOGS ──────────────────────────────────────────
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  userId    String
+  action    String   // CREATE, UPDATE, DELETE, SCAN, STATUS_CHANGE
+  entity    String   // Shipment, Warehouse, Route, etc.
+  entityId  String?
+  details   String?  // JSON string
+  ipAddress String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("audit_logs")
+}
+
+// ─── EMAIL LOGS ──────────────────────────────────────────
+
+model EmailLog {
+  id         String   @id @default(cuid())
+  to         String   // recipient email
+  subject    String
+  htmlBody   String   // full HTML content
+  textBody   String?  // plain text version
+  emailType  String   // SHIPMENT_CREATED, STATUS_UPDATE, DELIVERED, WELCOME, PASSWORD_CHANGE, INVOICE
+  status     String   @default("PENDING") // PENDING, SENT, FAILED
+  entityType String?  // Shipment, User, etc.
+  entityId   String?  // related entity ID
+  error      String?  // error message if failed
+  sentAt     DateTime?
+  createdAt  DateTime @default(now())
+
+  @@map("email_logs")
+}
+
+// ─── NOTIFICATIONS ───────────────────────────────────────
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  title      String
+  message    String
+  type       String   // INFO, SUCCESS, WARNING, ERROR, SHIPMENT_UPDATE
+  read       Boolean  @default(false)
+  link       String?  // optional navigation link
+  createdAt  DateTime @default(now())
+
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notifications")
+}
+
+// ─── PAYMENTS ───────────────────────────────────────────
+
+model Payment {
+  id              String   @id @default(cuid())
+  paymentId       String   @unique  // PAY-2026-000001
+  shipmentId      String
+  userId          String
+  amount          Float    // total amount in USD
+  subtotal        Float    // base shipping cost
+  handlingFee     Float    @default(0)  // 5% handling
+  insuranceFee    Float    @default(0)  // 1% insurance
+  currency        String   @default("USD")
+  method          String   // CREDIT_CARD, BANK_TRANSFER, WALLET, CASH
+  status          String   @default("PENDING")  // PENDING, PROCESSING, COMPLETED, FAILED, REFUNDED
+  transactionRef  String?  // external payment reference
+  cardLast4       String?  // last 4 digits of card (if applicable)
+  paidAt          DateTime?
+  refundedAt      DateTime?
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  shipment        Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("payments")
+}
+
+// ─── CHAT MESSAGES ───────────────────────────────────────
+
+model ChatMessage {
+  id        String   @id @default(cuid())
+  userId    String
+  role      String   // "user" or "assistant"
+  content   String
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+}
+
+// ─── PASSWORD RESET ──────────────────────────────────────
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  email     String
+  token     String   @unique
+  expiresAt DateTime
+  used      Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@map("password_resets")
+}
+
+// ─── SETTINGS ────────────────────────────────────────────
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   // JSON string for complex values
+  updatedAt DateTime @updatedAt
+
+  @@map("settings")
+}
+
+// ─── SUPPORT TICKETS ────────────────────────────────────
+
+model SupportTicket {
+  id          String   @id @default(cuid())
+  ticketId    String   @unique  // TK-2026-000001
+  subject     String
+  description String
+  category    String   // GENERAL, SHIPMENT_ISSUE, BILLING, CUSTOMS, DAMAGE, DELIVERY, OTHER
+  priority    String   @default("MEDIUM")  // LOW, MEDIUM, HIGH, URGENT
+  status      String   @default("OPEN")    // OPEN, IN_PROGRESS, WAITING_CUSTOMER, RESOLVED, CLOSED
+  customerId  String
+  shipmentId  String?
+  assignedTo  String?  // admin user id
+  resolution  String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  customer    User     @relation("CustomerTickets", fields: [customerId], references: [id])
+  assignee    User?    @relation("AssignedTickets", fields: [assignedTo], references: [id])
+  shipment    Shipment? @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
+  messages    TicketMessage[]
+
+  @@map("support_tickets")
+}
+
+model TicketMessage {
+  id        String   @id @default(cuid())
+  ticketId  String
+  userId    String
+  message   String
+  isInternal Boolean @default(false)  // internal notes visible only to staff
+  createdAt DateTime @default(now())
+
+  ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ticket_messages")
+}
+
+// ─── QUOTATIONS ──────────────────────────────────────────
+
+model Quotation {
+  id                  String          @id @default(cuid())
+  quotationId         String          @unique  // QUO-2026-XXXXXX
+  customerId          String
+  status              QuotationStatus @default(PENDING)
+  originCountry       String
+  originCity          String
+  destinationCountry  String
+  destinationCity     String
+  shippingMethod      String          // AIR, SEA, LAND
+  shipmentType        String          // PARCEL, LCL, FCL
+  weight              Float?
+  length              Float?
+  width               Float?
+  height              Float?
+  commodityType       String?
+  specialRequirements String?
+  quotedPrice         Float?
+  quotedCurrency      String          @default("USD")
+  estimatedDays       Int?
+  validUntil          DateTime?
+  notes               String?
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  reviewedById        String?
+  reviewedAt          DateTime?
+
+  customer            User            @relation("CustomerQuotations", fields: [customerId], references: [id])
+  reviewedBy          User?           @relation("ReviewedQuotations", fields: [reviewedById], references: [id])
+
+  @@map("quotations")
+}
