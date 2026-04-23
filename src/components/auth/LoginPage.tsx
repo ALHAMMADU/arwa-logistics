@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { motion } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { apiFetch } from '@/lib/api';
 import { ShipIcon, ArrowLeftIcon, EyeIcon, EyeOffIcon } from '@/components/icons';
@@ -55,25 +56,40 @@ export default function LoginPage() {
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-emerald-900 flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-500/20">
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-8"
+        >
+          <div className="w-16 h-16 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-xl shadow-emerald-500/25">
             <ShipIcon className="w-9 h-9 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white">{t('auth.loginTitle')}</h1>
           <p className="text-slate-400 mt-2">{t('auth.signInTo')}</p>
-        </div>
+        </motion.div>
 
         {/* Form */}
-        <form onSubmit={handleLogin} className="bg-white/5 border border-white/10 rounded-xl p-6 sm:p-8 backdrop-blur-sm space-y-5">
+        <motion.form
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1, duration: 0.5 }}
+          onSubmit={handleLogin}
+          className="bg-white/5 border border-white/10 rounded-2xl p-6 sm:p-8 backdrop-blur-sm space-y-5 shadow-xl"
+        >
           {error && (
-            <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-lg text-sm flex items-start gap-3">
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm flex items-start gap-3"
+            >
               <svg className="w-5 h-5 flex-shrink-0 mt-0.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="10" />
                 <line x1="12" x2="12" y1="8" y2="12" />
                 <line x1="12" x2="12.01" y1="16" y2="16" />
               </svg>
               <span>{error}</span>
-            </div>
+            </motion.div>
           )}
 
           <div>
@@ -82,7 +98,7 @@ export default function LoginPage() {
               type="email"
               value={email}
               onChange={e => setEmail(e.target.value)}
-              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-colors"
+              className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-200 hover:border-white/20"
               placeholder={t('auth.enterEmail')}
               required
             />
@@ -95,14 +111,14 @@ export default function LoginPage() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 transition-colors"
+                className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-200 hover:border-white/20"
                 placeholder={t('auth.enterPassword')}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors p-1 rounded-lg hover:bg-white/10"
               >
                 {showPassword ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
               </button>
@@ -111,14 +127,14 @@ export default function LoginPage() {
 
           {/* Remember Me & Forgot Password */}
           <div className="flex items-center justify-between">
-            <label className="flex items-center gap-2 cursor-pointer">
+            <label className="flex items-center gap-2 cursor-pointer group">
               <input
                 type="checkbox"
                 checked={rememberMe}
                 onChange={e => setRememberMe(e.target.checked)}
                 className="h-4 w-4 rounded border-slate-600 text-emerald-600 focus:ring-emerald-500 bg-white/5"
               />
-              <span className="text-sm text-slate-400">{t('auth.rememberMe')}</span>
+              <span className="text-sm text-slate-400 group-hover:text-slate-300 transition-colors">{t('auth.rememberMe')}</span>
             </label>
             <button
               type="button"
@@ -132,7 +148,7 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 bg-emerald-600 text-white rounded-lg font-semibold hover:bg-emerald-500 disabled:opacity-50 transition-colors flex items-center justify-center gap-2"
+            className="w-full py-3 bg-gradient-to-r from-emerald-600 to-emerald-500 text-white rounded-xl font-semibold hover:from-emerald-500 hover:to-emerald-400 disabled:opacity-50 transition-all duration-200 flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/20 hover:shadow-xl hover:shadow-emerald-500/30 active:scale-[0.98]"
           >
             {loading ? (
               <>
@@ -163,30 +179,30 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => { setEmail('admin@arwalogistics.com'); setPassword('admin123'); }}
-                className="w-full text-left px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-between"
+                className="w-full text-left px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-between group"
               >
                 <span>Admin: admin@arwalogistics.com</span>
-                <span className="text-slate-600">{t('auth.clickToFill')}</span>
+                <span className="text-slate-600 group-hover:text-slate-400 transition-colors">{t('auth.clickToFill')}</span>
               </button>
               <button
                 type="button"
                 onClick={() => { setEmail('customer@arwalogistics.com'); setPassword('customer123'); }}
-                className="w-full text-left px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-between"
+                className="w-full text-left px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-between group"
               >
                 <span>Customer: customer@arwalogistics.com</span>
-                <span className="text-slate-600">{t('auth.clickToFill')}</span>
+                <span className="text-slate-600 group-hover:text-slate-400 transition-colors">{t('auth.clickToFill')}</span>
               </button>
               <button
                 type="button"
                 onClick={() => { setEmail('warehouse@arwalogistics.com'); setPassword('warehouse123'); }}
-                className="w-full text-left px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-colors flex items-center justify-between"
+                className="w-full text-left px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-between group"
               >
                 <span>Warehouse: warehouse@arwalogistics.com</span>
-                <span className="text-slate-600">{t('auth.clickToFill')}</span>
+                <span className="text-slate-600 group-hover:text-slate-400 transition-colors">{t('auth.clickToFill')}</span>
               </button>
             </div>
           </div>
-        </form>
+        </motion.form>
 
         <button
           onClick={() => setCurrentPage('landing')}

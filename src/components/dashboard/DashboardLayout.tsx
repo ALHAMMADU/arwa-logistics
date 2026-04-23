@@ -57,6 +57,17 @@ function LiveIndicator() {
   );
 }
 
+// ─── User Avatar ─────────────────────────────────────────
+function UserAvatar({ name, size = 'sm' }: { name: string; size?: 'sm' | 'md' }) {
+  const sizeClass = size === 'md' ? 'w-10 h-10 text-sm' : 'w-8 h-8 text-xs';
+  const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+  return (
+    <div className={`${sizeClass} rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white font-bold flex-shrink-0 shadow-sm`}>
+      {initials}
+    </div>
+  );
+}
+
 export default function DashboardLayout({ children, navItems }: DashboardLayoutProps) {
   const { user, logout, currentPage, setCurrentPage, sidebarOpen, setSidebarOpen, theme } = useAppStore();
   const { dir, isRTL, t } = useI18n();
@@ -121,101 +132,154 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
       {/* Mobile overlay */}
       {mobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden transition-opacity"
           onClick={() => setMobileMenuOpen(false)}
           aria-hidden="true"
         />
       )}
 
       {/* Sidebar - Desktop */}
-      <aside className={`hidden md:flex ${sidebarOpen ? 'w-64' : 'w-16'} bg-slate-900 text-white transition-all duration-300 flex-col fixed h-full z-40 ${isRTL ? 'right-0' : 'left-0'}`}>
+      <aside className={`hidden md:flex ${sidebarOpen ? 'w-64' : 'w-16'} bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white transition-all duration-300 flex-col fixed h-full z-40 ${isRTL ? 'right-0' : 'left-0'} shadow-xl`}>
+        {/* Logo Section */}
         <div className="p-4 border-b border-white/10 flex items-center gap-3">
-          <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0">
+          <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20">
             <ShipIcon className="w-5 h-5 text-white" />
           </div>
-          {sidebarOpen && <span className="font-bold text-sm tracking-wide">ARWA LOGISTICS</span>}
+          {sidebarOpen && (
+            <div className="overflow-hidden">
+              <span className="font-bold text-sm tracking-wide whitespace-nowrap">ARWA LOGISTICS</span>
+            </div>
+          )}
         </div>
-        <nav className="flex-1 p-2 space-y-1 overflow-y-auto sidebar-scroll">
-          {navItems.map(item => (
-            <button
-              key={item.page}
-              onClick={() => setCurrentPage(item.page)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                currentPage === item.page
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              {item.icon}
-              {sidebarOpen && <span>{t(item.label)}</span>}
-            </button>
-          ))}
+
+        {/* Navigation */}
+        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto sidebar-scroll">
+          {navItems.map(item => {
+            const isActive = currentPage === item.page;
+            return (
+              <button
+                key={item.page}
+                onClick={() => setCurrentPage(item.page)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 relative group ${
+                  isActive
+                    ? 'bg-emerald-600/90 text-white shadow-md shadow-emerald-600/20'
+                    : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                }`}
+              >
+                {/* Active indicator bar */}
+                {isActive && (
+                  <span className={`absolute ${isRTL ? 'right-0' : 'left-0'} top-1/2 -translate-y-1/2 w-[3px] h-5 bg-white rounded-full`} />
+                )}
+                <span className={`flex-shrink-0 ${isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-200'} transition-colors`}>
+                  {item.icon}
+                </span>
+                {sidebarOpen && (
+                  <span className="truncate">{t(item.label)}</span>
+                )}
+                {/* Tooltip for collapsed sidebar */}
+                {!sidebarOpen && (
+                  <span className="absolute left-full ml-3 px-2 py-1 bg-slate-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+                    {t(item.label)}
+                  </span>
+                )}
+              </button>
+            );
+          })}
         </nav>
-        <div className="p-4 border-t border-white/10">
+
+        {/* User Section */}
+        <div className="p-3 border-t border-white/10">
           {sidebarOpen && user && (
-            <div className="mb-3">
-              <p className="text-sm font-medium text-white truncate">{user.name}</p>
-              <p className="text-xs text-slate-400 truncate">{user.email}</p>
-              <span className="inline-block mt-1 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded">
-                {user.role}
-              </span>
+            <div className="flex items-center gap-3 mb-3 p-2 rounded-lg bg-white/[0.04] hover:bg-white/[0.06] transition-colors">
+              <UserAvatar name={user.name} />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                <div className="flex items-center gap-1.5">
+                  <span className="inline-block px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded font-medium">
+                    {user.role}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
+          {!sidebarOpen && user && (
+            <div className="flex justify-center mb-2">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="cursor-pointer">
+                    <UserAvatar name={user.name} size="sm" />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="right">
+                  {user.name} ({user.role})
+                </TooltipContent>
+              </Tooltip>
             </div>
           )}
           <button
             onClick={logout}
-            className="w-full flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-red-400 rounded-lg text-sm transition-colors"
+            className={`w-full flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg text-sm transition-all duration-200 ${!sidebarOpen ? 'justify-center' : ''}`}
           >
-            <LogOutIcon className="w-4 h-4" /> {sidebarOpen && t('nav.signOut')}
+            <LogOutIcon className="w-4 h-4 flex-shrink-0" />
+            {sidebarOpen && <span>{t('nav.signOut')}</span>}
           </button>
         </div>
       </aside>
 
       {/* Sidebar - Mobile */}
-      <aside className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-40 w-72 bg-slate-900 text-white flex-col transform transition-transform duration-300 ease-in-out md:hidden ${mobileMenuOpen ? 'translate-x-0 flex' : (isRTL ? 'translate-x-full' : '-translate-x-full')}`}>
+      <aside className={`fixed inset-y-0 ${isRTL ? 'right-0' : 'left-0'} z-40 w-72 bg-gradient-to-b from-slate-900 via-slate-900 to-slate-950 text-white flex-col transform transition-transform duration-300 ease-in-out md:hidden ${mobileMenuOpen ? 'translate-x-0 flex' : (isRTL ? 'translate-x-full' : '-translate-x-full')}`}>
         <div className="p-4 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-emerald-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-lg flex items-center justify-center flex-shrink-0 shadow-lg shadow-emerald-500/20">
               <ShipIcon className="w-5 h-5 text-white" />
             </div>
             <span className="font-bold text-sm tracking-wide">ARWA LOGISTICS</span>
           </div>
           <button
             onClick={() => setMobileMenuOpen(false)}
-            className="p-1.5 text-slate-400 hover:text-white rounded-lg transition-colors"
+            className="p-1.5 text-slate-400 hover:text-white rounded-lg transition-colors hover:bg-white/10"
             aria-label="Close menu"
           >
             <XIcon className="w-5 h-5" />
           </button>
         </div>
-        <nav className="flex-1 p-2 space-y-1 overflow-y-auto sidebar-scroll">
-          {navItems.map(item => (
-            <button
-              key={item.page}
-              onClick={() => handleNavigate(item.page)}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                currentPage === item.page
-                  ? 'bg-emerald-600 text-white'
-                  : 'text-slate-400 hover:bg-white/5 hover:text-white'
-              }`}
-            >
-              {item.icon}
-              <span>{t(item.label)}</span>
-            </button>
-          ))}
+        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto sidebar-scroll">
+          {navItems.map(item => {
+            const isActive = currentPage === item.page;
+            return (
+              <button
+                key={item.page}
+                onClick={() => handleNavigate(item.page)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 relative ${
+                  isActive
+                    ? 'bg-emerald-600/90 text-white shadow-md shadow-emerald-600/20'
+                    : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
+                }`}
+              >
+                {isActive && (
+                  <span className={`absolute ${isRTL ? 'right-0' : 'left-0'} top-1/2 -translate-y-1/2 w-[3px] h-5 bg-white rounded-full`} />
+                )}
+                {item.icon}
+                <span>{t(item.label)}</span>
+              </button>
+            );
+          })}
         </nav>
-        <div className="p-4 border-t border-white/10">
+        <div className="p-3 border-t border-white/10">
           {user && (
-            <div className="mb-3">
-              <p className="text-sm font-medium text-white truncate">{user.name}</p>
-              <p className="text-xs text-slate-400 truncate">{user.email}</p>
-              <span className="inline-block mt-1 px-2 py-0.5 bg-emerald-500/20 text-emerald-400 text-xs rounded">
-                {user.role}
-              </span>
+            <div className="flex items-center gap-3 mb-3 p-2 rounded-lg bg-white/[0.04]">
+              <UserAvatar name={user.name} size="md" />
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-white truncate">{user.name}</p>
+                <span className="inline-block px-1.5 py-0.5 bg-emerald-500/20 text-emerald-400 text-[10px] rounded font-medium">
+                  {user.role}
+                </span>
+              </div>
             </div>
           )}
           <button
             onClick={() => { logout(); setMobileMenuOpen(false); }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-red-400 rounded-lg text-sm transition-colors"
+            className="w-full flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg text-sm transition-all duration-200"
           >
             <LogOutIcon className="w-4 h-4" /> {t('nav.signOut')}
           </button>
@@ -224,18 +288,18 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
 
       {/* Main Content */}
       <div className={`flex-1 hidden md:block ${isRTL ? (sidebarOpen ? 'md:mr-64' : 'md:mr-16') : (sidebarOpen ? 'md:ml-64' : 'md:ml-16')} transition-all duration-300`}>
-        <header className="bg-white dark:bg-[#1e293b] border-b border-slate-200 dark:border-slate-700 px-6 py-3 flex items-center justify-between sticky top-0 z-20">
+        <header className="bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 px-6 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-all duration-200 hover:shadow-sm"
               aria-label={t('nav.toggleSidebar') || 'Toggle sidebar'}
             >
               <MenuIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
             </button>
             <button
               onClick={() => setSearchOpen(true)}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg border border-slate-200 dark:border-slate-600 transition-colors min-w-[180px] sm:min-w-[220px]"
+              className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-400 bg-slate-50 dark:bg-slate-700 hover:bg-slate-100 dark:hover:bg-slate-600 rounded-lg border border-slate-200 dark:border-slate-600 transition-all duration-200 min-w-[180px] sm:min-w-[220px] hover:shadow-sm"
             >
               <SearchIcon className="w-4 h-4" />
               <span className="flex-1 text-left">{t('nav.search')}</span>
@@ -244,22 +308,25 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
               </kbd>
             </button>
           </div>
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             <LiveIndicator />
+            <div className="w-px h-5 bg-slate-200 dark:bg-slate-600 hidden sm:block" />
             <LanguageSwitcher />
             <ThemeToggle />
             <NotificationCenter />
+            <div className="w-px h-5 bg-slate-200 dark:bg-slate-600 hidden sm:block" />
             <button
               onClick={() => setCurrentPage('public-tracking')}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-emerald-600 bg-slate-100 dark:bg-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
+              className="hidden lg:flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 bg-slate-100 dark:bg-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-all duration-200"
             >
               <SearchIcon className="w-4 h-4" /> {t('nav.tracking')}
             </button>
             <button
               onClick={() => setCurrentPage('profile')}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-emerald-600 bg-slate-100 dark:bg-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-900/30 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-3 py-1.5 text-sm text-slate-600 dark:text-slate-300 hover:text-emerald-600 dark:hover:text-emerald-400 rounded-lg transition-all duration-200"
             >
-              <UserIcon className="w-4 h-4" /> {t('nav.profile')}
+              {user ? <UserAvatar name={user.name} size="sm" /> : <UserIcon className="w-4 h-4" />}
+              <span className="hidden lg:inline">{t('nav.profile')}</span>
             </button>
           </div>
         </header>
@@ -269,7 +336,7 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
       {/* Main Content - Mobile */}
       <div className="flex-1 md:hidden">
         {/* Mobile Header */}
-        <header className="bg-white dark:bg-[#1e293b] border-b border-slate-200 dark:border-slate-700 px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+        <header className="bg-white/80 dark:bg-[#1e293b]/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700 px-4 py-3 flex items-center justify-between sticky top-0 z-20 shadow-sm">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setMobileMenuOpen(true)}
@@ -279,13 +346,13 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
               <MenuIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
             </button>
             <div className="flex items-center gap-2">
-              <div className="w-7 h-7 bg-emerald-500 rounded-md flex items-center justify-center">
+              <div className="w-7 h-7 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-md flex items-center justify-center shadow-sm shadow-emerald-500/20">
                 <ShipIcon className="w-4 h-4 text-white" />
               </div>
               <span className="font-bold text-sm text-slate-900 dark:text-slate-100">ARWA</span>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5">
             <LiveIndicator />
             <LanguageSwitcher />
             <ThemeToggle />
@@ -299,36 +366,46 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
             <NotificationCenter />
             <button
               onClick={() => setCurrentPage('profile')}
-              className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center"
+              className="rounded-full overflow-hidden"
               aria-label="Profile"
             >
-              <UserIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              {user ? <UserAvatar name={user.name} size="sm" /> : (
+                <div className="w-8 h-8 bg-emerald-100 dark:bg-emerald-900/30 rounded-full flex items-center justify-center">
+                  <UserIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                </div>
+              )}
             </button>
           </div>
         </header>
         <main className="p-4 pb-20 md:pb-4"><Breadcrumb />{children}</main>
 
         {/* Mobile Bottom Navigation */}
-        <div className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 safe-area-bottom">
+        <div className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 safe-area-bottom">
           <div className="flex items-center justify-around px-2 py-1">
-            {visibleNavItems.map(item => (
-              <button
-                key={item.page}
-                onClick={() => setCurrentPage(item.page)}
-                className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors min-w-0 ${
-                  currentPage === item.page
-                    ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
-                    : 'text-slate-400 dark:text-slate-500'
-                }`}
-              >
-                {item.icon}
-                <span className="text-[10px] font-medium truncate">{t(item.label)}</span>
-              </button>
-            ))}
+            {visibleNavItems.map(item => {
+              const isActive = currentPage === item.page;
+              return (
+                <button
+                  key={item.page}
+                  onClick={() => setCurrentPage(item.page)}
+                  className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 min-w-0 relative ${
+                    isActive
+                      ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
+                      : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
+                  }`}
+                >
+                  {isActive && (
+                    <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-1 bg-emerald-500 rounded-full" />
+                  )}
+                  {item.icon}
+                  <span className="text-[10px] font-medium truncate">{t(item.label)}</span>
+                </button>
+              );
+            })}
             {hiddenNavItems.length > 0 && (
               <button
                 onClick={() => setMoreMenuOpen(true)}
-                className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors min-w-0 ${
+                className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 min-w-0 ${
                   isActiveInMore
                     ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
                     : 'text-slate-400 dark:text-slate-500'
@@ -353,20 +430,23 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
             </SheetDescription>
           </SheetHeader>
           <nav className="flex flex-col gap-1 overflow-y-auto max-h-[50vh] p-4 pt-0">
-            {hiddenNavItems.map(item => (
-              <button
-                key={item.page}
-                onClick={() => handleMoreNavigate(item.page)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-colors ${
-                  currentPage === item.page
-                    ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
-                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
-                }`}
-              >
-                {item.icon}
-                <span>{t(item.label)}</span>
-              </button>
-            ))}
+            {hiddenNavItems.map(item => {
+              const isActive = currentPage === item.page;
+              return (
+                <button
+                  key={item.page}
+                  onClick={() => handleMoreNavigate(item.page)}
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-all duration-200 ${
+                    isActive
+                      ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 font-medium'
+                      : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                  }`}
+                >
+                  {item.icon}
+                  <span>{t(item.label)}</span>
+                </button>
+              );
+            })}
           </nav>
         </SheetContent>
       </Sheet>

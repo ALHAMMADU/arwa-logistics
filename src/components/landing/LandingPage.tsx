@@ -320,6 +320,40 @@ export default function LandingPage() {
         </div>
       </AnimatedSection>
 
+      {/* Why Choose Us */}
+      <AnimatedSection className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
+        <div className="text-center mb-8 sm:mb-12">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-3">{t('landing.whyChooseUs') || 'Why Choose ARWA'}</h2>
+          <p className="text-slate-400 max-w-xl mx-auto">{t('landing.whyChooseUsDesc') || 'Reliable logistics solutions trusted by businesses worldwide'}</p>
+        </div>
+        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+          {[
+            { title: t('landing.featureTracking') || 'Real-time Tracking', desc: t('landing.featureTrackingDesc') || 'Track your shipments with 11-step status updates from origin to destination', icon: <ClockIcon className="w-6 h-6" />, color: 'from-emerald-500/20 to-emerald-600/10 border-emerald-500/20 hover:border-emerald-500/40' },
+            { title: t('landing.featureSecure') || 'Secure Packaging', desc: t('landing.featureSecureDesc') || 'Professional packaging and handling to ensure your goods arrive safely', icon: <ShieldIcon className="w-6 h-6" />, color: 'from-sky-500/20 to-sky-600/10 border-sky-500/20 hover:border-sky-500/40' },
+            { title: t('landing.featureRates') || 'Competitive Rates', desc: t('landing.featureRatesDesc') || 'Transparent pricing with no hidden fees for air, sea, and land freight', icon: <DollarIcon className="w-6 h-6" />, color: 'from-amber-500/20 to-amber-600/10 border-amber-500/20 hover:border-amber-500/40' },
+            { title: t('landing.featureGlobal') || 'Global Coverage', desc: t('landing.featureGlobalDesc') || 'Shipping to 180+ countries with strategic warehouse locations worldwide', icon: <GlobeIcon className="w-6 h-6" />, color: 'from-violet-500/20 to-violet-600/10 border-violet-500/20 hover:border-violet-500/40' },
+            { title: t('landing.featureFast') || 'Fast Delivery', desc: t('landing.featureFastDesc') || 'Express air freight with priority handling for time-sensitive shipments', icon: <TruckIcon className="w-6 h-6" />, color: 'from-rose-500/20 to-rose-600/10 border-rose-500/20 hover:border-rose-500/40' },
+            { title: t('landing.featureSupport') || '24/7 Support', desc: t('landing.featureSupportDesc') || 'Dedicated customer support team available around the clock for assistance', icon: <UsersIcon className="w-6 h-6" />, color: 'from-teal-500/20 to-teal-600/10 border-teal-500/20 hover:border-teal-500/40' },
+          ].map((feature, i) => (
+            <motion.div
+              key={i}
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.1, duration: 0.5 }}
+              whileHover={{ y: -4, transition: { duration: 0.2 } }}
+              className={`bg-gradient-to-br ${feature.color} border rounded-xl p-6 backdrop-blur-sm transition-all`}
+            >
+              <div className="w-12 h-12 rounded-xl bg-white/10 flex items-center justify-center text-emerald-400 mb-4">
+                {feature.icon}
+              </div>
+              <h3 className="text-lg font-semibold text-white mb-2">{feature.title}</h3>
+              <p className="text-sm text-slate-400 leading-relaxed">{feature.desc}</p>
+            </motion.div>
+          ))}
+        </div>
+      </AnimatedSection>
+
       {/* Rate Calculator */}
       <AnimatedSection className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
         <div className="text-center mb-8 sm:mb-12">
