@@ -7,6 +7,7 @@ import NotificationCenter from '@/components/shared/NotificationCenter';
 import GlobalSearch from '@/components/shared/GlobalSearch';
 import ThemeToggle from '@/components/shared/ThemeToggle';
 import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
+import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { useRealtimeStatus } from '@/components/shared/RealtimeProvider';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { useI18n } from '@/lib/i18n';
@@ -67,6 +68,16 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Lock body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.classList.add('menu-open');
+    } else {
+      document.body.classList.remove('menu-open');
+    }
+    return () => document.body.classList.remove('menu-open');
+  }, [mobileMenuOpen]);
 
   // Apply dark class to root element
   useEffect(() => {
@@ -224,7 +235,7 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
             </button>
           </div>
         </header>
-        <main className="p-6">{children}</main>
+        <main className="p-6"><Breadcrumb />{children}</main>
       </div>
 
       {/* Main Content - Mobile */}
@@ -267,7 +278,27 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
             </button>
           </div>
         </header>
-        <main className="p-4">{children}</main>
+        <main className="p-4 pb-20 md:pb-4"><Breadcrumb />{children}</main>
+
+        {/* Mobile Bottom Navigation */}
+        <div className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 safe-area-bottom">
+          <div className="flex items-center justify-around px-2 py-1">
+            {navItems.slice(0, 5).map(item => (
+              <button
+                key={item.page}
+                onClick={() => setCurrentPage(item.page)}
+                className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors min-w-0 ${
+                  currentPage === item.page
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-slate-400 dark:text-slate-500'
+                }`}
+              >
+                {item.icon}
+                <span className="text-[10px] font-medium truncate">{t(item.label)}</span>
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
 
       {/* Global Search Modal */}

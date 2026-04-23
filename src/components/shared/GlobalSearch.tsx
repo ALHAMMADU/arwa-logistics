@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { apiFetch } from '@/lib/api';
 import { useAppStore } from '@/lib/store';
 import { SearchIcon, XIcon, PackageIcon, ClockIcon } from '@/components/icons';
@@ -207,25 +208,34 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
   const showNoResults = showResults && visibleResults.length === 0 && !state.loading;
 
   return (
-    <>
-      {/* Backdrop */}
+    <AnimatePresence>
       {open && (
-        <div
-          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
-          onClick={handleClose}
-        />
-      )}
+        <>
+          {/* Backdrop */}
+          <motion.div
+            key="search-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+            onClick={handleClose}
+          />
 
-      {/* Modal */}
-      {open && (
-        <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
-          <div
-            className="w-full max-w-xl bg-white rounded-xl border border-slate-200 shadow-2xl overflow-hidden"
-            onClick={(e) => e.stopPropagation()}
-          >
+          {/* Modal */}
+          <div className="fixed inset-0 z-50 flex items-start justify-center pt-[15vh]">
+            <motion.div
+              key="search-modal"
+              initial={{ opacity: 0, y: -20, scale: 0.95 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              exit={{ opacity: 0, y: -10, scale: 0.98 }}
+              transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+              className="w-full max-w-xl bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xl overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
             {/* Search Input */}
-            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200">
-              <SearchIcon className="w-5 h-5 text-slate-400 shrink-0" />
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-slate-200 dark:border-slate-700">
+              <SearchIcon className="w-5 h-5 text-slate-400 dark:text-slate-500 shrink-0" />
               <input
                 ref={inputRef}
                 type="text"
@@ -233,7 +243,7 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
                 onChange={handleQueryChange}
                 onKeyDown={handleKeyDown}
                 placeholder="Search shipments by ID, tracking, city, name..."
-                className="flex-1 bg-transparent text-sm text-slate-900 placeholder:text-slate-400 outline-none"
+                className="flex-1 bg-transparent text-sm text-slate-900 dark:text-slate-100 placeholder:text-slate-400 dark:placeholder:text-slate-500 outline-none"
               />
               {state.loading && (
                 <div className="h-4 w-4 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent shrink-0" />
@@ -241,12 +251,12 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
               {state.query && !state.loading && (
                 <button
                   onClick={handleClearQuery}
-                  className="p-1 hover:bg-slate-100 rounded transition-colors"
+                  className="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition-colors"
                 >
-                  <XIcon className="w-4 h-4 text-slate-400" />
+                  <XIcon className="w-4 h-4 text-slate-400 dark:text-slate-500" />
                 </button>
               )}
-              <kbd className="hidden sm:inline-flex items-center gap-1 rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+              <kbd className="hidden sm:inline-flex items-center gap-1 rounded border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:text-slate-500">
                 ESC
               </kbd>
             </div>
@@ -257,10 +267,10 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
               {showRecent && (
                 <div className="p-2">
                   <div className="flex items-center justify-between px-3 py-2">
-                    <span className="text-xs font-medium text-slate-500">Recent Searches</span>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Recent Searches</span>
                     <button
                       onClick={() => dispatch({ type: 'CLEAR_RECENT' })}
-                      className="text-xs text-slate-400 hover:text-slate-600 transition-colors"
+                      className="text-xs text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                     >
                       Clear
                     </button>
@@ -269,10 +279,10 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
                     <button
                       key={i}
                       onClick={() => dispatch({ type: 'SET_QUERY', query: recent })}
-                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors text-left"
+                      className="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors text-left"
                     >
-                      <ClockIcon className="w-4 h-4 text-slate-400 shrink-0" />
-                      <span className="text-sm text-slate-700">{recent}</span>
+                      <ClockIcon className="w-4 h-4 text-slate-400 dark:text-slate-500 shrink-0" />
+                      <span className="text-sm text-slate-700 dark:text-slate-300">{recent}</span>
                     </button>
                   ))}
                 </div>
@@ -282,7 +292,7 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
               {showResults && (
                 <div className="p-2">
                   <div className="px-3 py-2">
-                    <span className="text-xs font-medium text-slate-500">Shipments</span>
+                    <span className="text-xs font-medium text-slate-500 dark:text-slate-400">Shipments</span>
                   </div>
                   {visibleResults.length > 0 ? (
                     visibleResults.map((shipment, i) => (
@@ -291,16 +301,16 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
                         onClick={() => selectResult(shipment)}
                         className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-colors text-left ${
                           state.selectedIndex === i
-                            ? 'bg-emerald-50 ring-1 ring-emerald-200'
-                            : 'hover:bg-slate-50'
+                            ? 'bg-emerald-50 dark:bg-emerald-900/20 ring-1 ring-emerald-200 dark:ring-emerald-800'
+                            : 'hover:bg-slate-50 dark:hover:bg-slate-700/50'
                         }`}
                       >
-                        <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                          <PackageIcon className="w-4 h-4 text-emerald-600" />
+                        <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/20 flex items-center justify-center shrink-0">
+                          <PackageIcon className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
-                            <span className="text-sm font-mono font-medium text-slate-900">
+                            <span className="text-sm font-mono font-medium text-slate-900 dark:text-slate-100">
                               {shipment.shipmentId}
                             </span>
                             <span
@@ -311,11 +321,11 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
                               {SHIPMENT_STATUS_LABELS[shipment.status] || shipment.status}
                             </span>
                           </div>
-                          <div className="text-xs text-slate-500 truncate mt-0.5">
+                          <div className="text-xs text-slate-500 dark:text-slate-400 truncate mt-0.5">
                             {shipment.destinationCity}, {shipment.destinationCountry} · {shipment.receiverName} · {SHIPPING_METHOD_LABELS[shipment.shippingMethod] || shipment.shippingMethod}
                           </div>
                         </div>
-                        <div className="text-xs text-slate-400 shrink-0">
+                        <div className="text-xs text-slate-400 dark:text-slate-500 shrink-0">
                           ${shipment.shipmentValue?.toLocaleString()}
                         </div>
                       </button>
@@ -323,9 +333,9 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
                   ) : null}
                   {showNoResults && (
                     <div className="flex flex-col items-center gap-2 py-8 px-4">
-                      <PackageIcon className="w-8 h-8 text-slate-300" />
-                      <p className="text-sm text-slate-500">No shipments found</p>
-                      <p className="text-xs text-slate-400">Try searching by shipment ID, tracking number, city, or name</p>
+                      <PackageIcon className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+                      <p className="text-sm text-slate-500 dark:text-slate-400">No shipments found</p>
+                      <p className="text-xs text-slate-400 dark:text-slate-500">Try searching by shipment ID, tracking number, city, or name</p>
                     </div>
                   )}
                 </div>
@@ -334,20 +344,20 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
               {/* Empty initial state */}
               {!hasQuery && state.recentSearches.length === 0 && (
                 <div className="flex flex-col items-center gap-2 py-8 px-4">
-                  <SearchIcon className="w-8 h-8 text-slate-300" />
-                  <p className="text-sm text-slate-500">Search shipments</p>
-                  <p className="text-xs text-slate-400">
+                  <SearchIcon className="w-8 h-8 text-slate-300 dark:text-slate-600" />
+                  <p className="text-sm text-slate-500 dark:text-slate-400">Search shipments</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">
                     Find by ID, tracking number, city, sender, or receiver
                   </p>
                   <div className="mt-2 flex items-center gap-1">
-                    <kbd className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+                    <kbd className="inline-flex items-center rounded border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:text-slate-500">
                       Ctrl
                     </kbd>
-                    <span className="text-xs text-slate-400">+</span>
-                    <kbd className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-1.5 py-0.5 text-[10px] font-medium text-slate-400">
+                    <span className="text-xs text-slate-400 dark:text-slate-500">+</span>
+                    <kbd className="inline-flex items-center rounded border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-1.5 py-0.5 text-[10px] font-medium text-slate-400 dark:text-slate-500">
                       K
                     </kbd>
-                    <span className="text-xs text-slate-400 ml-1">to search anytime</span>
+                    <span className="text-xs text-slate-400 dark:text-slate-500 ml-1">to search anytime</span>
                   </div>
                 </div>
               )}
@@ -355,24 +365,25 @@ export default function GlobalSearch({ open, onOpenChange }: { open: boolean; on
 
             {/* Footer hint */}
             {showResults && visibleResults.length > 0 && (
-              <div className="border-t border-slate-100 px-4 py-2 flex items-center gap-4 text-[10px] text-slate-400">
+              <div className="border-t border-slate-100 dark:border-slate-700 px-4 py-2 flex items-center gap-4 text-[10px] text-slate-400 dark:text-slate-500">
                 <span className="flex items-center gap-1">
-                  <kbd className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-1 py-0.5 text-[10px] font-medium">↑↓</kbd>
+                  <kbd className="inline-flex items-center rounded border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-1 py-0.5 text-[10px] font-medium">↑↓</kbd>
                   Navigate
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-1 py-0.5 text-[10px] font-medium">↵</kbd>
+                  <kbd className="inline-flex items-center rounded border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-1 py-0.5 text-[10px] font-medium">↵</kbd>
                   Open
                 </span>
                 <span className="flex items-center gap-1">
-                  <kbd className="inline-flex items-center rounded border border-slate-200 bg-slate-50 px-1 py-0.5 text-[10px] font-medium">Esc</kbd>
+                  <kbd className="inline-flex items-center rounded border border-slate-200 dark:border-slate-600 bg-slate-50 dark:bg-slate-700 px-1 py-0.5 text-[10px] font-medium">Esc</kbd>
                   Close
                 </span>
               </div>
             )}
+            </motion.div>
           </div>
-        </div>
+        </>
       )}
-    </>
+    </AnimatePresence>
   );
 }

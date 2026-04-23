@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { apiFetch } from '@/lib/api';
 import { useFetch } from '@/lib/useFetch';
 import {
@@ -10,6 +11,7 @@ import {
 import { SHIPMENT_STATUS_LABELS, SHIPMENT_STATUS_COLORS, SHIPPING_METHOD_LABELS } from '@/lib/shipping';
 import { toast } from 'sonner';
 import AutoRefresh from '@/components/shared/AutoRefresh';
+import { SkeletonStats, SkeletonTable } from '@/components/shared/SkeletonLoaders';
 
 // ─── Types ───────────────────────────────────────────────
 interface Shipment {
@@ -206,10 +208,34 @@ export default function WarehouseDashboard({ initialView = 'overview' }: Warehou
 
   const displayShipments = activeTab === 'pending' ? pendingShipments : activeTab === 'processing' ? processingShipments : allShipments;
 
+  // Loading state
+  if (loading && allShipments.length === 0) {
+    return (
+      <div className="space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Warehouse Dashboard</h1>
+            <p className="text-slate-500 dark:text-slate-400">Monitor, scan, and process shipments</p>
+          </div>
+        </div>
+        <SkeletonStats count={5} />
+        <div className="grid lg:grid-cols-2 gap-6">
+          <SkeletonTable rows={5} columns={4} />
+          <SkeletonTable rows={5} columns={3} />
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div>
+    <div className="space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+      <motion.div
+        initial={{ opacity: 0, y: -10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+      >
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Warehouse Dashboard</h1>
           <p className="text-slate-500 dark:text-slate-400">Monitor, scan, and process shipments</p>
@@ -227,13 +253,18 @@ export default function WarehouseDashboard({ initialView = 'overview' }: Warehou
             onClick={loadShipments}
             className="p-2 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 transition-colors"
           >
-            <RefreshIcon className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+            <RefreshIcon className={`w-4 h-4 text-slate-600 dark:text-slate-300 ${loading ? 'animate-spin' : ''}`} />
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Dashboard Navigation Tabs */}
-      <div className="flex gap-2 mb-6 overflow-x-auto pb-1">
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1, duration: 0.4 }}
+        className="flex gap-2 overflow-x-auto pb-1"
+      >
         {[
           { key: 'overview', label: 'Overview', icon: <BarChartIcon className="w-4 h-4" /> },
           { key: 'scan', label: 'Quick Scan', icon: <QRIcon className="w-4 h-4" /> },
@@ -244,18 +275,26 @@ export default function WarehouseDashboard({ initialView = 'overview' }: Warehou
             onClick={() => setDashboardView(tab.key as 'overview' | 'scan' | 'shipments')}
             className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
               dashboardView === tab.key
-                ? 'bg-emerald-600 text-white'
+                ? 'bg-emerald-600 text-white shadow-sm'
                 : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600 hover:bg-slate-50 dark:hover:bg-slate-600'
             }`}
           >
             {tab.icon} {tab.label}
           </button>
         ))}
-      </div>
+      </motion.div>
 
       {/* ─── OVERVIEW TAB ──────────────────────────────── */}
+      <AnimatePresence mode="wait">
       {dashboardView === 'overview' && (
-        <div className="space-y-6">
+        <motion.div
+          key="overview"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 10 }}
+          transition={{ duration: 0.25 }}
+          className="space-y-6"
+        >
           {/* Stats Cards */}
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
             <StatCard
@@ -380,7 +419,12 @@ export default function WarehouseDashboard({ initialView = 'overview' }: Warehou
           </div>
 
           {/* Quick Scan Section on Overview */}
-          <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4">
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.4 }}
+            className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4"
+          >
             <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
               <QRIcon className="w-4 h-4 text-emerald-500" />
               Quick Scan
@@ -400,13 +444,20 @@ export default function WarehouseDashboard({ initialView = 'overview' }: Warehou
                 Scan
               </button>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       )}
 
       {/* ─── SCAN TAB ─────────────────────────────────── */}
       {dashboardView === 'scan' && (
-        <div className="space-y-6">
+        <motion.div
+          key="scan"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 10 }}
+          transition={{ duration: 0.25 }}
+          className="space-y-6"
+        >
           {/* Scan Input */}
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
@@ -469,12 +520,18 @@ export default function WarehouseDashboard({ initialView = 'overview' }: Warehou
               <button onClick={() => setShipmentDetail(null)} className="text-sm text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200">Close</button>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
 
       {/* ─── SHIPMENTS TAB ────────────────────────────── */}
       {dashboardView === 'shipments' && (
-        <div>
+        <motion.div
+          key="shipments"
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 10 }}
+          transition={{ duration: 0.25 }}
+        >
           {/* Tab Filters */}
           <div className="flex gap-2 mb-4 flex-wrap">
             <button onClick={() => setActiveTab('pending')} className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${activeTab === 'pending' ? 'bg-yellow-500 text-white' : 'bg-white dark:bg-slate-700 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-600'}`}>
@@ -490,7 +547,7 @@ export default function WarehouseDashboard({ initialView = 'overview' }: Warehou
 
           {/* Shipments Table */}
           {loading ? (
-            <div className="text-center py-12 text-slate-400 dark:text-slate-500">Loading...</div>
+            <SkeletonTable rows={6} columns={6} />
           ) : displayShipments.length === 0 ? (
             <div className="text-center py-12">
               <PackageIcon className="w-12 h-12 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
@@ -537,8 +594,9 @@ export default function WarehouseDashboard({ initialView = 'overview' }: Warehou
               </div>
             </div>
           )}
-        </div>
+        </motion.div>
       )}
+      </AnimatePresence>
     </div>
   );
 }

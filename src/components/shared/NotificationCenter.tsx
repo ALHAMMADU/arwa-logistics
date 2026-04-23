@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAppStore } from '@/lib/store';
 import { apiFetch } from '@/lib/api';
 import { BellIcon, XIcon, PackageIcon, CheckCircleIcon, ClockIcon, TruckIcon } from '@/components/icons';
@@ -44,6 +45,21 @@ const STATUS_LABELS: Record<string, string> = {
   DELIVERED: 'Delivered',
 };
 
+// i18n key mapping for status labels
+const STATUS_I18N_KEYS: Record<string, string> = {
+  CREATED: 'status.created',
+  WAITING_WAREHOUSE_ARRIVAL: 'status.waitingWarehouse',
+  RECEIVED_AT_WAREHOUSE: 'status.receivedWarehouse',
+  PROCESSING: 'status.processing',
+  READY_FOR_DISPATCH: 'status.readyDispatch',
+  DISPATCHED: 'status.dispatched',
+  IN_TRANSIT: 'status.inTransit',
+  ARRIVED_AT_DESTINATION: 'status.arrivedDestination',
+  CUSTOMS_CLEARANCE: 'status.customsClearance',
+  OUT_FOR_DELIVERY: 'status.outDelivery',
+  DELIVERED: 'status.delivered',
+};
+
 function getStatusIcon(status: string) {
   switch (status) {
     case 'DELIVERED':
@@ -75,7 +91,7 @@ function formatTimeAgo(timestamp: string): string {
 
 export default function NotificationCenter() {
   const { setCurrentPage, setSelectedShipmentId } = useAppStore();
-  const { isRTL } = useI18n();
+  const { isRTL, t } = useI18n();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
@@ -132,6 +148,16 @@ export default function NotificationCenter() {
     }
   }, [open]);
 
+  // Close on Escape key
+  useEffect(() => {
+    if (!open) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [open]);
+
   // Mark all as read
   const handleMarkAllRead = async () => {
     try {
@@ -166,25 +192,36 @@ export default function NotificationCenter() {
         className="relative p-2 hover:bg-slate-100 rounded-lg transition-colors"
         aria-label="Notifications"
       >
-        <BellIcon className="w-5 h-5 text-slate-600" />
+        <BellIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
         {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-500 rounded-full">
+          <motion.span
+            key={unreadCount}
+            initial={{ scale: 1.5 }}
+            animate={{ scale: 1 }}
+            transition={{ type: 'spring', stiffness: 300, damping: 15 }}
+            className="absolute -top-0.5 -right-0.5 flex items-center justify-center min-w-[18px] h-[18px] px-1 text-[10px] font-bold text-white bg-red-500 rounded-full"
+          >
             {unreadCount > 99 ? '99+' : unreadCount}
-          </span>
+          </motion.span>
         )}
       </button>
 
       {/* Dropdown Panel */}
-      {open && (
-        <div
-          ref={panelRef}
-          className={`absolute ${isRTL ? 'left-0' : 'right-0'} top-full mt-2 w-80 sm:w-96 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden`}
-        >
+      <AnimatePresence>
+        {open && (
+          <motion.div
+            ref={panelRef}
+            initial={{ opacity: 0, y: -8, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -8, scale: 0.95 }}
+            transition={{ duration: 0.15 }}
+            className={`absolute ${isRTL ? 'left-0' : 'right-0'} top-full mt-2 w-80 sm:w-96 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 shadow-xl z-50 overflow-hidden`}
+          >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50">
             <div className="flex items-center gap-2">
-              <BellIcon className="w-4 h-4 text-slate-600" />
-              <h3 className="text-sm font-semibold text-slate-900">Notifications</h3>
+              <BellIcon className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">{t('notifications.title')}</h3>
               {unreadCount > 0 && (
                 <span className="px-1.5 py-0.5 text-[10px] font-bold text-white bg-red-500 rounded-full">
                   {unreadCount}
@@ -195,16 +232,16 @@ export default function NotificationCenter() {
               {unreadCount > 0 && (
                 <button
                   onClick={handleMarkAllRead}
-                  className="text-xs text-emerald-600 hover:text-emerald-700 font-medium px-2 py-1 hover:bg-emerald-50 rounded transition-colors"
+                  className="text-xs text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 font-medium px-2 py-1 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 rounded transition-colors"
                 >
-                  Mark all read
+                  {t('notifications.markAllRead')}
                 </button>
               )}
               <button
                 onClick={() => setOpen(false)}
-                className="p-1 hover:bg-slate-200 rounded transition-colors"
+                className="p-1 hover:bg-slate-200 dark:hover:bg-slate-600 rounded transition-colors"
               >
-                <XIcon className="w-4 h-4 text-slate-400" />
+                <XIcon className="w-4 h-4 text-slate-400 dark:text-slate-500" />
               </button>
             </div>
           </div>
@@ -217,9 +254,9 @@ export default function NotificationCenter() {
               </div>
             ) : notifications.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-10 px-4">
-                <BellIcon className="w-10 h-10 text-slate-300 mb-3" />
-                <p className="text-sm text-slate-500 font-medium">No notifications yet</p>
-                <p className="text-xs text-slate-400 mt-1">We&apos;ll notify you when shipments are updated</p>
+                <BellIcon className="w-10 h-10 text-slate-300 dark:text-slate-600 mb-3" />
+                <p className="text-sm text-slate-500 dark:text-slate-400 font-medium">{t('notifications.noNotifications')}</p>
+                <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t('notifications.shipmentUpdated')}</p>
               </div>
             ) : (
               <div className="divide-y divide-slate-50">
@@ -227,7 +264,7 @@ export default function NotificationCenter() {
                   <button
                     key={notification.id}
                     onClick={() => handleNotificationClick(notification)}
-                    className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition-colors flex gap-3 ${
+                    className={`w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors flex gap-3 ${
                       !notification.read ? 'bg-emerald-50/50' : ''
                     }`}
                   >
@@ -252,22 +289,23 @@ export default function NotificationCenter() {
                       </div>
                       <div className="flex items-center gap-1.5 mb-1">
                         <span className={`inline-block w-2 h-2 rounded-full ${STATUS_NOTIFICATION_COLORS[notification.status] || 'bg-slate-400'}`} />
-                        <span className="text-sm text-slate-800 font-medium truncate">
-                          {STATUS_LABELS[notification.status] || notification.status}
+                        <span className="text-sm text-slate-800 dark:text-slate-100 font-medium truncate">
+                          {t(STATUS_I18N_KEYS[notification.status] || STATUS_LABELS[notification.status] || notification.status)}
                         </span>
                       </div>
                       {notification.location && (
-                        <p className="text-xs text-slate-500 truncate">{notification.location}</p>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate">{notification.location}</p>
                       )}
-                      <p className="text-[11px] text-slate-400 mt-1">{formatTimeAgo(notification.timestamp)}</p>
+                      <p className="text-[11px] text-slate-400 dark:text-slate-500 mt-1">{formatTimeAgo(notification.timestamp)}</p>
                     </div>
                   </button>
                 ))}
               </div>
             )}
           </div>
-        </div>
-      )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

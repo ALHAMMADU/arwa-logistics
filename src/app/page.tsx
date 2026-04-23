@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { AnimatePresence, motion } from 'framer-motion';
 import { useAppStore, AppPage } from '@/lib/store';
 import { apiFetch } from '@/lib/api';
 import { toast } from 'sonner';
@@ -44,6 +45,7 @@ import AIChatWidget from '@/components/shared/AIChatWidget';
 import RealtimeProvider from '@/components/shared/RealtimeProvider';
 import ShipmentMap from '@/components/shared/ShipmentMap';
 import { ShippingLabelPage } from '@/components/shared/ShippingLabel';
+import { BackToTopButton } from '@/components/shared/BackToTopButton';
 
 // Icons for nav
 import {
@@ -175,8 +177,23 @@ function ShippingLabelPageWrapper() {
   return <ShippingLabelPage labels={labels} onClose={() => setCurrentPage('dashboard')} />;
 }
 
+// Page transition variants
+const pageVariants = {
+  initial: { opacity: 0, y: 8 },
+  animate: { opacity: 1, y: 0 },
+  exit: { opacity: 0, y: -4 },
+};
+
+const pageTransition = {
+  type: 'tween' as const,
+  ease: [0.4, 0, 0.2, 1] as [number, number, number, number],
+  duration: 0.25,
+};
+
 export default function App() {
   const { currentPage, user, token, setUser, setCurrentPage } = useAppStore();
+  const mainRef = useRef<HTMLDivElement>(null);
+  const prevPageRef = useRef<AppPage>(currentPage);
 
   // Restore session on mount
   useEffect(() => {
@@ -192,6 +209,19 @@ export default function App() {
       });
     }
   }, []);
+
+  // Scroll to top on page change
+  useEffect(() => {
+    if (prevPageRef.current !== currentPage) {
+      prevPageRef.current = currentPage;
+      // Scroll the main content area
+      const mainEl = mainRef.current?.querySelector('main') || document.querySelector('main');
+      if (mainEl) {
+        mainEl.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }, [currentPage]);
 
   // Determine which page to show
   const publicPages: AppPage[] = ['landing', 'login', 'register', 'forgot-password', 'reset-password', 'public-tracking'];
@@ -255,8 +285,22 @@ export default function App() {
     <I18nProvider>
       <ErrorBoundary>
         <RealtimeProvider>
-          {content}
+          <div ref={mainRef}>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentPage}
+                variants={pageVariants}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={pageTransition}
+              >
+                {content}
+              </motion.div>
+            </AnimatePresence>
+          </div>
           <AIChatWidget />
+          <BackToTopButton />
         </RealtimeProvider>
       </ErrorBoundary>
     </I18nProvider>

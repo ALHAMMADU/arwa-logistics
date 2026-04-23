@@ -6,6 +6,22 @@ import { apiFetch } from '@/lib/api';
 import { toast } from 'sonner';
 import { UserIcon, ShieldIcon, SaveIcon, KeyIcon, EyeIcon, EyeOffIcon } from '@/components/icons';
 
+function getPasswordStrength(password: string): { label: string; color: string; width: string } {
+  if (!password) return { label: '', color: '', width: '0%' };
+  let score = 0;
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  if (score <= 1) return { label: 'Weak', color: 'bg-red-500', width: '20%' };
+  if (score === 2) return { label: 'Fair', color: 'bg-amber-500', width: '40%' };
+  if (score === 3) return { label: 'Good', color: 'bg-yellow-500', width: '60%' };
+  if (score === 4) return { label: 'Strong', color: 'bg-emerald-500', width: '80%' };
+  return { label: 'Very Strong', color: 'bg-emerald-600', width: '100%' };
+}
+
 export default function ProfilePage() {
   const { user, setUser, token } = useAppStore();
   const [loading, setLoading] = useState(true);
@@ -141,9 +157,9 @@ export default function ProfilePage() {
   // Role badge color
   const getRoleBadge = (roleStr: string) => {
     switch (roleStr) {
-      case 'ADMIN': return 'bg-red-100 text-red-700';
-      case 'WAREHOUSE_STAFF': return 'bg-amber-100 text-amber-700';
-      default: return 'bg-emerald-100 text-emerald-700';
+      case 'ADMIN': return 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400';
+      case 'WAREHOUSE_STAFF': return 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400';
+      default: return 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400';
     }
   };
 
@@ -158,21 +174,89 @@ export default function ProfilePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-emerald-600" />
+      <div className="max-w-3xl mx-auto">
+        <div className="mb-6">
+          <div className="h-8 w-56 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+          <div className="mt-2 h-4 w-72 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+        </div>
+        {/* Profile Card Skeleton */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden mb-6">
+          <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-8">
+            <div className="flex items-center gap-4">
+              <div className="w-20 h-20 rounded-full bg-white/20 animate-pulse" />
+              <div className="space-y-2">
+                <div className="h-6 w-40 animate-pulse rounded bg-white/20" />
+                <div className="h-4 w-56 animate-pulse rounded bg-white/20" />
+                <div className="h-5 w-24 animate-pulse rounded-full bg-white/20" />
+              </div>
+            </div>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="h-6 w-48 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="h-4 w-20 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+                <div className="h-10 w-full animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-12 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+                <div className="h-10 w-full animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="h-4 w-28 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+                <div className="h-10 w-full animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-16 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+                <div className="h-10 w-full animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <div className="h-4 w-10 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+              <div className="h-10 w-full animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+            </div>
+            <div className="flex justify-end">
+              <div className="h-10 w-32 animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+            </div>
+          </div>
+        </div>
+        {/* Password Card Skeleton */}
+        <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
+          <div className="p-6 space-y-4">
+            <div className="h-6 w-44 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+            <div className="space-y-2">
+              <div className="h-4 w-28 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+              <div className="h-10 w-full animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <div className="h-4 w-24 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+                <div className="h-10 w-full animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+              </div>
+              <div className="space-y-2">
+                <div className="h-4 w-36 animate-pulse rounded bg-slate-200 dark:bg-slate-700" />
+                <div className="h-10 w-full animate-pulse rounded-lg bg-slate-200 dark:bg-slate-700" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
 
+  const passwordStrength = getPasswordStrength(newPassword);
+
   return (
     <div className="max-w-3xl mx-auto">
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-slate-900">Profile & Settings</h1>
-        <p className="text-slate-500 mt-1">Manage your account information and security</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Profile & Settings</h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1">Manage your account information and security</p>
       </div>
 
       {/* Profile Card */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden mb-6">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden mb-6">
         <div className="bg-gradient-to-r from-emerald-600 to-teal-600 px-6 py-8">
           <div className="flex items-center gap-4">
             <div className="w-20 h-20 rounded-full bg-white/20 backdrop-blur-sm border-2 border-white/40 flex items-center justify-center flex-shrink-0">
@@ -191,62 +275,62 @@ export default function ProfilePage() {
         <div className="p-6">
           <div className="flex items-center gap-2 mb-5">
             <UserIcon className="w-5 h-5 text-emerald-600" />
-            <h3 className="text-lg font-semibold text-slate-900">Personal Information</h3>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Personal Information</h3>
           </div>
 
           <div className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Full Name</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Full Name</label>
                 <input
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                  className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   placeholder="Enter your name"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Email</label>
                 <input
                   type="email"
                   value={email}
                   disabled
-                  className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 text-slate-500 cursor-not-allowed"
+                  className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg text-sm bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
                 />
               </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Phone Number</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Phone Number</label>
                 <input
                   type="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                  className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   placeholder="Enter your phone number"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Company</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Company</label>
                 <input
                   type="text"
                   value={company}
                   onChange={(e) => setCompany(e.target.value)}
-                  className="w-full px-3 py-2.5 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                  className="w-full px-3 py-2.5 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   placeholder="Enter your company name"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Role</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Role</label>
               <input
                 type="text"
                 value={getRoleLabel(role)}
                 disabled
-                className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm bg-slate-50 text-slate-500 cursor-not-allowed"
+                className="w-full px-3 py-2.5 border border-slate-200 dark:border-slate-600 rounded-lg text-sm bg-slate-50 dark:bg-slate-700 text-slate-500 dark:text-slate-400 cursor-not-allowed"
               />
             </div>
           </div>
@@ -274,28 +358,28 @@ export default function ProfilePage() {
       </div>
 
       {/* Password Change Card */}
-      <div className="bg-white rounded-xl border border-slate-200 overflow-hidden">
+      <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="p-6">
           <div className="flex items-center gap-2 mb-5">
             <ShieldIcon className="w-5 h-5 text-emerald-600" />
-            <h3 className="text-lg font-semibold text-slate-900">Change Password</h3>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">Change Password</h3>
           </div>
 
           <div className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1.5">Current Password</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Current Password</label>
               <div className="relative">
                 <input
                   type={showCurrentPassword ? 'text' : 'password'}
                   value={currentPassword}
                   onChange={(e) => setCurrentPassword(e.target.value)}
-                  className="w-full px-3 py-2.5 pr-10 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                  className="w-full px-3 py-2.5 pr-10 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                   placeholder="Enter current password"
                 />
                 <button
                   type="button"
                   onClick={() => setShowCurrentPassword(!showCurrentPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                 >
                   {showCurrentPassword ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                 </button>
@@ -304,61 +388,80 @@ export default function ProfilePage() {
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">New Password</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">New Password</label>
                 <div className="relative">
                   <input
                     type={showNewPassword ? 'text' : 'password'}
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full px-3 py-2.5 pr-10 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                    className="w-full px-3 py-2.5 pr-10 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                     placeholder="Enter new password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowNewPassword(!showNewPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                   >
                     {showNewPassword ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                   </button>
                 </div>
+                {newPassword && (
+                  <div className="mt-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-slate-600 dark:text-slate-400">Password strength:</span>
+                      <span className={`text-xs font-medium ${
+                        passwordStrength.label === 'Weak' ? 'text-red-500' :
+                        passwordStrength.label === 'Fair' ? 'text-amber-500' :
+                        passwordStrength.label === 'Good' ? 'text-yellow-500' :
+                        'text-emerald-500'
+                      }`}>{passwordStrength.label}</span>
+                    </div>
+                    <div className="w-full h-1.5 bg-slate-200 dark:bg-slate-600 rounded-full overflow-hidden">
+                      <div
+                        className={`h-full rounded-full transition-all duration-300 ${passwordStrength.color}`}
+                        style={{ width: passwordStrength.width }}
+                      />
+                    </div>
+                  </div>
+                )}
                 {newPassword && newPassword.length < 8 && (
-                  <p className="mt-1 text-xs text-amber-600">Password must be at least 8 characters</p>
+                  <p className="mt-1 text-xs text-amber-600 dark:text-amber-400">Password must be at least 8 characters</p>
                 )}
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Confirm New Password</label>
+                <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Confirm New Password</label>
                 <div className="relative">
                   <input
                     type={showConfirmPassword ? 'text' : 'password'}
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-3 py-2.5 pr-10 border border-slate-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
+                    className="w-full px-3 py-2.5 pr-10 border border-slate-300 dark:border-slate-600 rounded-lg text-sm bg-white dark:bg-slate-700 dark:text-white focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 transition-colors"
                     placeholder="Confirm new password"
                   />
                   <button
                     type="button"
                     onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
                   >
                     {showConfirmPassword ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
                   </button>
                 </div>
                 {confirmPassword && newPassword !== confirmPassword && (
-                  <p className="mt-1 text-xs text-red-500">Passwords do not match</p>
+                  <p className="mt-1 text-xs text-red-500 dark:text-red-400">Passwords do not match</p>
                 )}
               </div>
             </div>
           </div>
 
           <div className="mt-6 flex items-center justify-between">
-            <div className="flex items-center gap-2 text-sm text-slate-500">
+            <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
               <KeyIcon className="w-4 h-4" />
               <span>Minimum 8 characters required</span>
             </div>
             <button
               onClick={handleChangePassword}
               disabled={changingPassword}
-              className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 text-white rounded-lg font-medium hover:bg-slate-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-slate-900 dark:bg-slate-700 text-white rounded-lg font-medium hover:bg-slate-800 dark:hover:bg-slate-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {changingPassword ? (
                 <>
