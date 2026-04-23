@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAppStore } from '@/lib/store';
 import { apiFetch } from '@/lib/api';
 import { BellIcon, XIcon, PackageIcon, CheckCircleIcon, ClockIcon, TruckIcon } from '@/components/icons';
+import { useI18n } from '@/lib/i18n';
 
 interface Notification {
   id: string;
@@ -74,6 +75,7 @@ function formatTimeAgo(timestamp: string): string {
 
 export default function NotificationCenter() {
   const { setCurrentPage, setSelectedShipmentId } = useAppStore();
+  const { isRTL } = useI18n();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(false);
@@ -176,7 +178,7 @@ export default function NotificationCenter() {
       {open && (
         <div
           ref={panelRef}
-          className="absolute right-0 top-full mt-2 w-80 sm:w-96 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden"
+          className={`absolute ${isRTL ? 'left-0' : 'right-0'} top-full mt-2 w-80 sm:w-96 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden`}
         >
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3 border-b border-slate-100 bg-slate-50">

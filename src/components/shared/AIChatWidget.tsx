@@ -20,7 +20,7 @@ interface Message {
 // Welcome message is now created dynamically using i18n inside the component
 
 export default function AIChatWidget() {
-  const { t } = useI18n();
+  const { t, isRTL } = useI18n();
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
@@ -154,7 +154,7 @@ export default function AIChatWidget() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition-all duration-300 hover:bg-emerald-700 hover:shadow-xl hover:scale-105 active:scale-95 dark:bg-emerald-500 dark:hover:bg-emerald-600"
+          className={`fixed bottom-6 ${isRTL ? 'left-6' : 'right-6'} z-50 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-600 text-white shadow-lg transition-all duration-300 hover:bg-emerald-700 hover:shadow-xl hover:scale-105 active:scale-95 dark:bg-emerald-500 dark:hover:bg-emerald-600`}
           aria-label={t('aiChat.openAssistant')}
         >
           <ChatIcon className="w-6 h-6" />
@@ -163,7 +163,7 @@ export default function AIChatWidget() {
 
       {/* Chat Panel */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 flex flex-col w-[calc(100vw-3rem)] sm:w-[400px] h-[500px] max-h-[80vh] rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800 dark:shadow-slate-900/50 transition-all duration-300 overflow-hidden">
+        <div className={`fixed bottom-6 ${isRTL ? 'left-6' : 'right-6'} z-50 flex flex-col w-[calc(100vw-3rem)] sm:w-[400px] h-[500px] max-h-[80vh] rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-800 dark:shadow-slate-900/50 transition-all duration-300 overflow-hidden`}>
           {/* Chat Header */}
           <div className="flex items-center justify-between px-4 py-3 bg-emerald-600 dark:bg-emerald-700 text-white shrink-0">
             <div className="flex items-center gap-2">
@@ -213,8 +213,8 @@ export default function AIChatWidget() {
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed whitespace-pre-wrap break-words ${
                       message.role === 'user'
-                        ? 'bg-emerald-600 text-white dark:bg-emerald-500 rounded-br-md'
-                        : 'bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-100 rounded-bl-md'
+                        ? `bg-emerald-600 text-white dark:bg-emerald-500 ${isRTL ? 'rounded-bl-md' : 'rounded-br-md'}`
+                        : `bg-slate-100 text-slate-800 dark:bg-slate-700 dark:text-slate-100 ${isRTL ? 'rounded-br-md' : 'rounded-bl-md'}`
                     }`}
                   >
                     {message.role === 'assistant' && message.id === 'welcome' && (

@@ -79,6 +79,8 @@ model User {
   quotations      Quotation[]      @relation("CustomerQuotations")
   reviewedQuotations Quotation[]   @relation("ReviewedQuotations")
 
+  @@index([role])
+  @@index([active])
   @@map("users")
 }
 
@@ -123,6 +125,12 @@ model Shipment {
   payments            Payment[]
   tickets             SupportTicket[]
 
+  @@index([customerId])
+  @@index([warehouseId])
+  @@index([status])
+  @@index([active])
+  @@index([createdAt])
+  @@index([shippingMethod])
   @@map("shipments")
 }
 
@@ -138,6 +146,9 @@ model ShipmentTracking {
 
   shipment    Shipment        @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
 
+  @@index([shipmentId])
+  @@index([status])
+  @@index([timestamp])
   @@map("shipment_tracking")
 }
 
@@ -153,6 +164,7 @@ model ShipmentPhoto {
 
   shipment    Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
 
+  @@index([shipmentId])
   @@map("shipment_photos")
 }
 
@@ -172,6 +184,7 @@ model Warehouse {
   manager   User?    @relation(fields: [managerId], references: [id])
   shipments Shipment[]
 
+  @@index([active])
   @@map("warehouses")
 }
 
@@ -187,6 +200,7 @@ model Country {
   active       Boolean  @default(true)
   createdAt    DateTime @default(now())
 
+  @@index([active])
   @@map("countries")
 }
 
@@ -194,7 +208,7 @@ model Country {
 
 model ShippingRoute {
   id                  String   @id @default(cuid())
-  name                String   // e.g. "China → Saudi Arabia"
+  name                String   // e.g. "China -> Saudi Arabia"
   originCountry       String   // China
   destinationCountry  String
   destinationCity     String?
@@ -210,6 +224,8 @@ model ShippingRoute {
 
   shipments           Shipment[]
 
+  @@unique([originCountry, destinationCountry, destinationCity])
+  @@index([active])
   @@map("shipping_routes")
 }
 
@@ -217,7 +233,7 @@ model ShippingRoute {
 
 model AuditLog {
   id        String   @id @default(cuid())
-  userId    String
+  userId    String?
   action    String   // CREATE, UPDATE, DELETE, SCAN, STATUS_CHANGE
   entity    String   // Shipment, Warehouse, Route, etc.
   entityId  String?
@@ -225,8 +241,12 @@ model AuditLog {
   ipAddress String?
   createdAt DateTime @default(now())
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
 
+  @@index([userId])
+  @@index([action])
+  @@index([entity])
+  @@index([createdAt])
   @@map("audit_logs")
 }
 
@@ -246,6 +266,10 @@ model EmailLog {
   sentAt     DateTime?
   createdAt  DateTime @default(now())
 
+  @@index([to])
+  @@index([status])
+  @@index([emailType])
+  @@index([createdAt])
   @@map("email_logs")
 }
 
@@ -263,6 +287,9 @@ model Notification {
 
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([read])
+  @@index([createdAt])
   @@map("notifications")
 }
 
@@ -291,6 +318,10 @@ model Payment {
   shipment        Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([shipmentId])
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
   @@map("payments")
 }
 
@@ -305,6 +336,8 @@ model ChatMessage {
 
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([userId])
+  @@index([createdAt])
   @@map("chat_messages")
 }
 
@@ -318,6 +351,8 @@ model PasswordReset {
   used      Boolean  @default(false)
   createdAt DateTime @default(now())
 
+  @@index([email])
+  @@index([expiresAt])
   @@map("password_resets")
 }
 
@@ -354,20 +389,26 @@ model SupportTicket {
   shipment    Shipment? @relation(fields: [shipmentId], references: [id], onDelete: SetNull)
   messages    TicketMessage[]
 
+  @@index([customerId])
+  @@index([assignedTo])
+  @@index([status])
+  @@index([createdAt])
   @@map("support_tickets")
 }
 
 model TicketMessage {
-  id        String   @id @default(cuid())
-  ticketId  String
-  userId    String
-  message   String
+  id         String   @id @default(cuid())
+  ticketId   String
+  userId     String
+  message    String
   isInternal Boolean @default(false)  // internal notes visible only to staff
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
 
   ticket    SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  @@index([ticketId])
+  @@index([createdAt])
   @@map("ticket_messages")
 }
 
@@ -382,8 +423,8 @@ model Quotation {
   originCity          String
   destinationCountry  String
   destinationCity     String
-  shippingMethod      String          // AIR, SEA, LAND
-  shipmentType        String          // PARCEL, LCL, FCL
+  shippingMethod      ShippingMethod
+  shipmentType        ShipmentType
   weight              Float?
   length              Float?
   width               Float?
@@ -403,5 +444,9 @@ model Quotation {
   customer            User            @relation("CustomerQuotations", fields: [customerId], references: [id])
   reviewedBy          User?           @relation("ReviewedQuotations", fields: [reviewedById], references: [id])
 
+  @@index([customerId])
+  @@index([status])
+  @@index([reviewedById])
+  @@index([createdAt])
   @@map("quotations")
 }

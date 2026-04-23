@@ -135,6 +135,35 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'Missing required fields' }, { status: 400 });
     }
 
+    // Validate numeric fields
+    const parsedWeight = parseFloat(weight);
+    const parsedValue = parseFloat(shipmentValue);
+    if (isNaN(parsedWeight) || parsedWeight <= 0 || parsedWeight > 100000) {
+      return NextResponse.json({ success: false, error: 'Invalid weight value' }, { status: 400 });
+    }
+    if (isNaN(parsedValue) || parsedValue < 0 || parsedValue > 10000000) {
+      return NextResponse.json({ success: false, error: 'Invalid shipment value' }, { status: 400 });
+    }
+
+    // Validate enum fields
+    const VALID_METHODS = ['AIR', 'SEA', 'LAND'];
+    const VALID_TYPES = ['PARCEL', 'LCL', 'FCL'];
+    if (!VALID_METHODS.includes(shippingMethod)) {
+      return NextResponse.json({ success: false, error: 'Invalid shipping method' }, { status: 400 });
+    }
+    if (!VALID_TYPES.includes(shipmentType)) {
+      return NextResponse.json({ success: false, error: 'Invalid shipment type' }, { status: 400 });
+    }
+
+    // Validate string length limits
+    const MAX_STRING_LENGTH = 500;
+    if (senderName.length > MAX_STRING_LENGTH || receiverName.length > MAX_STRING_LENGTH) {
+      return NextResponse.json({ success: false, error: 'Name fields are too long' }, { status: 400 });
+    }
+    if (productDescription.length > 2000) {
+      return NextResponse.json({ success: false, error: 'Product description is too long' }, { status: 400 });
+    }
+
     const shipmentId = await generateShipmentId();
     const trackingNumber = generateTrackingNumber();
     const qrCodeData = generateQRCodeData(shipmentId, trackingNumber);
@@ -150,12 +179,12 @@ export async function POST(request: Request) {
         receiverAddress: receiverAddress || null,
         destinationCountry,
         destinationCity,
-        weight: parseFloat(weight),
+        weight: parsedWeight,
         length: length ? parseFloat(length) : null,
         width: width ? parseFloat(width) : null,
         height: height ? parseFloat(height) : null,
         productDescription,
-        shipmentValue: parseFloat(shipmentValue),
+        shipmentValue: parsedValue,
         shippingMethod,
         shipmentType,
         status: 'CREATED',

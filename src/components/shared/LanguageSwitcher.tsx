@@ -5,7 +5,7 @@ import { useI18n, localeNames, localeFlags, type Locale, locales } from '@/lib/i
 import { GlobeIcon } from '@/components/icons';
 
 export default function LanguageSwitcher() {
-  const { locale, setLocale } = useI18n();
+  const { locale, setLocale, isRTL } = useI18n();
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -52,7 +52,7 @@ export default function LanguageSwitcher() {
         <>
           {/* Invisible overlay to catch clicks */}
           <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
-          <div className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-50 py-1 animate-in fade-in-0 zoom-in-95">
+          <div className={`absolute ${isRTL ? 'left-0' : 'right-0'} top-full mt-1 w-48 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-600 rounded-lg shadow-lg z-50 py-1 animate-in fade-in-0 zoom-in-95`}>
             <div className="px-3 py-2 border-b border-slate-100 dark:border-slate-700">
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">Language</p>
             </div>

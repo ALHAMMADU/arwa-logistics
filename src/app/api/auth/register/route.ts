@@ -4,6 +4,9 @@ import { hashPassword, generateToken } from '@/lib/auth';
 import { rateLimit, createAuditLog, getClientIp } from '@/lib/rbac';
 import { sendWelcomeEmail } from '@/lib/email';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const MAX_NAME_LENGTH = 200;
+
 export async function POST(request: Request) {
   try {
     // Rate limiting (public endpoint)
@@ -13,12 +16,28 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password, name, phone, company, role } = body;
 
-    if (!email || !password || !name) {
-      return NextResponse.json({ success: false, error: 'Email, password, and name are required' }, { status: 400 });
+    // Input validation
+    if (!email || !EMAIL_REGEX.test(email)) {
+      return NextResponse.json({ success: false, error: 'Valid email is required' }, { status: 400 });
     }
 
-    if (password.length < 6) {
-      return NextResponse.json({ success: false, error: 'Password must be at least 6 characters' }, { status: 400 });
+    if (!password) {
+      return NextResponse.json({ success: false, error: 'Password is required' }, { status: 400 });
+    }
+
+    // Stronger password policy: min 8 chars, at least one uppercase, one lowercase, one number
+    if (password.length < 8) {
+      return NextResponse.json({ success: false, error: 'Password must be at least 8 characters' }, { status: 400 });
+    }
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+      return NextResponse.json({ success: false, error: 'Password must contain uppercase, lowercase, and a number' }, { status: 400 });
+    }
+
+    if (!name || name.trim().length === 0) {
+      return NextResponse.json({ success: false, error: 'Name is required' }, { status: 400 });
+    }
+    if (name.length > MAX_NAME_LENGTH) {
+      return NextResponse.json({ success: false, error: 'Name is too long' }, { status: 400 });
     }
 
     const existing = await db.user.findFirst({ where: { email } });
@@ -37,9 +56,9 @@ export async function POST(request: Request) {
       data: {
         email,
         password: hashedPassword,
-        name,
-        phone: phone || null,
-        company: company || null,
+        name: name.trim(),
+        phone: phone?.trim() || null,
+        company: company?.trim() || null,
         role: userRole,
       },
     });

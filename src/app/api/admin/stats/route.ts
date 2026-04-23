@@ -68,12 +68,17 @@ export async function GET(request: Request) {
       }),
     ]);
 
-    const totalValue = totalValueResult._sum.shipmentValue || 0;
+    // Calculate percentage changes (compare current month vs last month)
+    // Current month revenue
+    const currentMonthValueResult = await db.shipment.aggregate({
+      _sum: { shipmentValue: true },
+      where: { createdAt: { gte: startOfMonth } },
+    });
+    const currentMonthValue = currentMonthValueResult._sum.shipmentValue || 0;
     const lastMonthValue = lastMonthValueResult._sum.shipmentValue || 0;
 
-    // Calculate percentage changes
     const revenueChange = lastMonthValue > 0
-      ? Math.round(((totalValue - lastMonthValue) / lastMonthValue) * 100)
+      ? Math.round(((currentMonthValue - lastMonthValue) / lastMonthValue) * 100)
       : 0;
     const shipmentChange = lastMonthShipmentsCount > 0
       ? Math.round(((totalShipments - lastMonthShipmentsCount) / lastMonthShipmentsCount) * 100)
@@ -97,8 +102,8 @@ export async function GET(request: Request) {
         totalWarehouses,
         totalRoutes,
         totalCountries,
-        totalValue,
-        totalRevenue: totalValue,
+        totalValue: totalValueResult._sum.shipmentValue || 0,
+        totalRevenue: totalValueResult._sum.shipmentValue || 0,
         revenueChange,
         shipmentChange,
         shipmentsByStatus: statusCounts,

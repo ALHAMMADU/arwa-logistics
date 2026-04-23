@@ -125,12 +125,16 @@ export default function CustomerDashboard() {
   // Spending data for chart (last 6 months)
   const spendingData = useMemo(() => {
     const monthlyTotals: number[] = [];
+    const now = new Date();
     for (let i = 5; i >= 0; i--) {
+      // Properly handle month subtraction (works across year boundaries)
+      const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const targetMonth = targetDate.getMonth();
+      const targetYear = targetDate.getFullYear();
       const monthTotal = shipments
         .filter((s: any) => {
           const d = new Date(s.createdAt);
-          const now = new Date();
-          return d.getMonth() === now.getMonth() - i && d.getFullYear() === now.getFullYear();
+          return d.getMonth() === targetMonth && d.getFullYear() === targetYear;
         })
         .reduce((sum: number, s: any) => sum + (s.shipmentValue || 0), 0);
       monthlyTotals.push(monthTotal);
@@ -291,6 +295,9 @@ export default function CustomerDashboard() {
                   transition={{ delay: 0.05 * i, duration: 0.3 }}
                   whileHover={{ y: -3, boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
                   onClick={() => { setSelectedShipmentId(s.id); setCurrentPage('shipment-detail'); }}
+                  onKeyDown={(e) => { if (e.key === 'Enter') { setSelectedShipmentId(s.id); setCurrentPage('shipment-detail'); } }}
+                  role="button"
+                  tabIndex={0}
                   className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 cursor-pointer transition-all group"
                 >
                   <div className="flex items-start justify-between mb-3">

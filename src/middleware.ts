@@ -7,11 +7,13 @@ import type { NextRequest } from 'next/server';
 // verification logic here using the Web Crypto API, matching the
 // HS256 / base64url scheme used in src/lib/auth.ts.
 
-const _jwtSecret = process.env.JWT_SECRET;
-if (!_jwtSecret) {
-  throw new Error('JWT_SECRET environment variable is required. Please set it in your .env file.');
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required. Please set it in your .env file.');
+  }
+  return secret;
 }
-const JWT_SECRET: string = _jwtSecret;
 
 interface TokenPayload {
   id: string;
@@ -29,7 +31,7 @@ async function verifyTokenEdge(token: string): Promise<TokenPayload | null> {
     // Verify signature using Web Crypto API (HMAC-SHA256)
     const key = await crypto.subtle.importKey(
       'raw',
-      new TextEncoder().encode(JWT_SECRET),
+      new TextEncoder().encode(getJwtSecret()),
       { name: 'HMAC', hash: 'SHA-256' },
       false,
       ['verify']

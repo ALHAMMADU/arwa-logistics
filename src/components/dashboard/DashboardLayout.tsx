@@ -86,6 +86,7 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
         <div
           className="fixed inset-0 bg-black/50 z-30 md:hidden"
           onClick={() => setMobileMenuOpen(false)}
+          aria-hidden="true"
         />
       )}
 
@@ -189,6 +190,7 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
               className="p-2 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
+              aria-label={t('nav.toggleSidebar') || 'Toggle sidebar'}
             >
               <MenuIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
             </button>

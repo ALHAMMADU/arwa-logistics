@@ -3,6 +3,14 @@ import { seedDatabase } from '@/lib/seed';
 import { rateLimit, checkAccess } from '@/lib/rbac';
 
 export async function POST(request: Request) {
+  // Disable seed endpoint in production
+  if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json(
+      { success: false, error: 'Seed endpoint is not available in production' },
+      { status: 403 }
+    );
+  }
+
   const rateLimitResult = rateLimit(request);
   if (rateLimitResult) return rateLimitResult;
 

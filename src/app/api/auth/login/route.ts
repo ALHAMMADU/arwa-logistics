@@ -3,6 +3,9 @@ import { db } from '@/lib/db';
 import { verifyPassword, hashPassword, needsRehash, generateToken } from '@/lib/auth';
 import { rateLimit, createAuditLog, getClientIp } from '@/lib/rbac';
 
+// Dummy hash for timing attack prevention — always perform bcrypt comparison
+const DUMMY_HASH = '$2a$12$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
+
 export async function POST(request: Request) {
   try {
     // Rate limiting (public endpoint)
@@ -12,17 +15,23 @@ export async function POST(request: Request) {
     const body = await request.json();
     const { email, password } = body;
 
-    if (!email || !password) {
-      return NextResponse.json({ success: false, error: 'Email and password are required' }, { status: 400 });
+    // Email format validation
+    const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !EMAIL_REGEX.test(email)) {
+      return NextResponse.json({ success: false, error: 'Valid email is required' }, { status: 400 });
+    }
+
+    if (!password) {
+      return NextResponse.json({ success: false, error: 'Password is required' }, { status: 400 });
     }
 
     const user = await db.user.findFirst({ where: { email } });
-    if (!user) {
-      return NextResponse.json({ success: false, error: 'Invalid email or password' }, { status: 401 });
-    }
 
-    const isValid = await verifyPassword(password, user.password);
-    if (!isValid) {
+    // Always perform bcrypt comparison to prevent timing attacks
+    const hashToCompare = user ? user.password : DUMMY_HASH;
+    const isValid = await verifyPassword(password, hashToCompare);
+
+    if (!user || !isValid) {
       return NextResponse.json({ success: false, error: 'Invalid email or password' }, { status: 401 });
     }
 

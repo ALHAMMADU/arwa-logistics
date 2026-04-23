@@ -1,11 +1,13 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 
-const _jwtSecret = process.env.JWT_SECRET;
-if (!_jwtSecret) {
-  throw new Error('JWT_SECRET environment variable is required. Please set it in your .env file.');
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    throw new Error('JWT_SECRET environment variable is required. Please set it in your .env file.');
+  }
+  return secret;
 }
-const JWT_SECRET: string = _jwtSecret;
 const SALT_ROUNDS = 12;
 
 // ─── bcrypt Password Hashing (Primary) ──────────────────────
@@ -51,14 +53,14 @@ export function generateToken(payload: TokenPayload): string {
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
   const exp = Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60; // 7 days
   const body = Buffer.from(JSON.stringify({ ...payload, exp })).toString('base64url');
-  const signature = crypto.createHmac('sha256', JWT_SECRET).update(`${header}.${body}`).digest('base64url');
+  const signature = crypto.createHmac('sha256', getJwtSecret()).update(`${header}.${body}`).digest('base64url');
   return `${header}.${body}.${signature}`;
 }
 
 export function verifyToken(token: string): TokenPayload | null {
   try {
     const [header, body, signature] = token.split('.');
-    const expectedSignature = crypto.createHmac('sha256', JWT_SECRET).update(`${header}.${body}`).digest('base64url');
+    const expectedSignature = crypto.createHmac('sha256', getJwtSecret()).update(`${header}.${body}`).digest('base64url');
     if (signature !== expectedSignature) return null;
     const payload = JSON.parse(Buffer.from(body, 'base64url').toString());
     if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) return null;

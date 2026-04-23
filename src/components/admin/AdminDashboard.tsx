@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { apiFetch } from '@/lib/api';
 import { useFetch } from '@/lib/useFetch';
@@ -292,25 +292,26 @@ export default function AdminDashboard() {
     dynamicCountriesChartConfig[c.country] = { label: c.country, color: c.fill };
   });
 
-  // Revenue This Week – generate from last 7 revenue data points or mock
-  const revenueWeekData = (() => {
+  // Revenue This Week – deterministic data from monthly revenue
+  const revenueWeekData = useMemo(() => {
     const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
     const today = new Date().getDay(); // 0=Sun
     const adjustedToday = today === 0 ? 6 : today - 1; // 0=Mon
-    // Use real data if available, otherwise generate from monthly revenue
+    // Deterministic daily multipliers (simulate real variation without randomness)
+    const dayMultipliers = [0.7, 0.85, 1.0, 1.15, 1.1, 0.5, 0.3];
     if (chartData?.revenueOverTime?.length > 0) {
       const lastRevenue = chartData.revenueOverTime[chartData.revenueOverTime.length - 1].revenue;
       const dailyAvg = Math.round(lastRevenue / 30);
       return days.map((day, i) => ({
         day,
-        revenue: i <= adjustedToday ? Math.round(dailyAvg * (0.6 + Math.random() * 0.8)) : 0,
+        revenue: i <= adjustedToday ? Math.round(dailyAvg * dayMultipliers[i]) : 0,
       }));
     }
     return days.map((day, i) => ({
       day,
-      revenue: i <= adjustedToday ? Math.round(800 + Math.random() * 600) : 0,
+      revenue: i <= adjustedToday ? Math.round(1000 * dayMultipliers[i]) : 0,
     }));
-  })();
+  }, [chartData?.revenueOverTime]);
 
   const weekRevenueTotal = revenueWeekData.reduce((sum: number, d: any) => sum + d.revenue, 0);
 
@@ -642,8 +643,9 @@ export default function AdminDashboard() {
               </PieChart>
             </ChartContainer>
             <div className="flex-1 space-y-2 w-full">
-              {methodData.map((m: any) => {
+              {(() => {
                 const total = methodData.reduce((a: number, b: any) => a + b.value, 0);
+                return methodData.map((m: any) => {
                 const percentage = total > 0 ? Math.round((m.value / total) * 100) : 0;
                 return (
                   <div key={m.method} className="space-y-1.5">
@@ -677,7 +679,8 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 );
-              })}
+              })
+              })()}
             </div>
           </div>
         </motion.div>

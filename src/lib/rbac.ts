@@ -7,8 +7,20 @@ export interface RBACOptions {
   roles?: Role[];
 }
 
-// Simple in-memory rate limiting store
+// Simple in-memory rate limiting store with periodic cleanup
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
+
+// Periodic cleanup of expired rate limit entries (every 5 minutes)
+if (typeof setInterval !== 'undefined') {
+  setInterval(() => {
+    const now = Date.now();
+    for (const [key, record] of rateLimitStore.entries()) {
+      if (now > record.resetTime) {
+        rateLimitStore.delete(key);
+      }
+    }
+  }, 5 * 60 * 1000);
+}
 
 /**
  * Check if a request has proper authentication and authorization
@@ -45,6 +57,7 @@ export function checkAccess(
 
 /**
  * Rate limiting middleware - returns null if allowed, NextResponse if rate limited
+ * Uses pathname only (not full URL) to prevent bypass via query params
  */
 export function rateLimit(
   request: Request,
@@ -54,8 +67,18 @@ export function rateLimit(
   const maxRequests = options?.maxRequests || 60; // 60 requests per minute
 
   const forwarded = request.headers.get('x-forwarded-for');
-  const ip = forwarded ? forwarded.split(',')[0].trim() : 'unknown';
-  const key = `${ip}:${request.url}`;
+  // Use the rightmost IP in the chain (set by trusted reverse proxy)
+  const ips = forwarded ? forwarded.split(',') : [];
+  const ip = ips.length > 0 ? ips[ips.length - 1].trim() : (request.headers.get('x-real-ip')?.trim() || 'unknown');
+
+  // Use pathname only — not full URL — to prevent bypass via query params
+  let pathname: string;
+  try {
+    pathname = new URL(request.url).pathname;
+  } catch {
+    pathname = request.url;
+  }
+  const key = `${ip}:${pathname}`;
 
   const now = Date.now();
   const record = rateLimitStore.get(key);
@@ -86,7 +109,10 @@ export function rateLimit(
  */
 export function getClientIp(request: Request): string {
   const forwarded = request.headers.get('x-forwarded-for');
-  if (forwarded) return forwarded.split(',')[0].trim();
+  if (forwarded) {
+    const ips = forwarded.split(',');
+    return ips[ips.length - 1].trim();
+  }
   const realIp = request.headers.get('x-real-ip');
   if (realIp) return realIp.trim();
   return 'unknown';
