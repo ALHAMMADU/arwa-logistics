@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useAppStore, AppPage } from '@/lib/store';
-import { ShipIcon, LogOutIcon, MenuIcon, SearchIcon, UserIcon, BellIcon, XIcon } from '@/components/icons';
+import { ShipIcon, LogOutIcon, MenuIcon, SearchIcon, UserIcon, XIcon } from '@/components/icons';
 import NotificationCenter from '@/components/shared/NotificationCenter';
 import GlobalSearch from '@/components/shared/GlobalSearch';
 import ThemeToggle from '@/components/shared/ThemeToggle';
@@ -10,11 +10,22 @@ import LanguageSwitcher from '@/components/shared/LanguageSwitcher';
 import { Breadcrumb } from '@/components/shared/Breadcrumb';
 import { useRealtimeStatus } from '@/components/shared/RealtimeProvider';
 import { Tooltip, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { useI18n } from '@/lib/i18n';
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   navItems: { page: AppPage; label: string; icon: React.ReactNode }[];
+}
+
+function MoreIcon({ className = "w-5 h-5" }: { className?: string }) {
+  return (
+    <svg className={className} role="img" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor">
+      <circle cx="5" cy="12" r="2" />
+      <circle cx="12" cy="12" r="2" />
+      <circle cx="19" cy="12" r="2" />
+    </svg>
+  );
 }
 
 function LiveIndicator() {
@@ -51,6 +62,13 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
   const { dir, isRTL, t } = useI18n();
   const [searchOpen, setSearchOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
+
+  const visibleNavItems = navItems.slice(0, 4);
+  const hiddenNavItems = navItems.slice(4);
+
+  // Check if current page is in the "more" list
+  const isActiveInMore = hiddenNavItems.some(item => item.page === currentPage);
 
   // Close mobile menu on page change
   const handleNavigate = (page: AppPage) => {
@@ -58,11 +76,18 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
     setMobileMenuOpen(false);
   };
 
+  // Handle navigate from "more" menu
+  const handleMoreNavigate = (page: AppPage) => {
+    setCurrentPage(page);
+    setMoreMenuOpen(false);
+  };
+
   // Close mobile menu when resizing to desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
         setMobileMenuOpen(false);
+        setMoreMenuOpen(false);
       }
     };
     window.addEventListener('resize', handleResize);
@@ -79,16 +104,17 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
     return () => document.body.classList.remove('menu-open');
   }, [mobileMenuOpen]);
 
-  // Apply dark class to root element
+  // Keyboard shortcut: Cmd+K / Ctrl+K to open GlobalSearch
   useEffect(() => {
-    if (typeof document !== 'undefined') {
-      if (theme === 'dark') {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setSearchOpen(true);
       }
-    }
-  }, [theme]);
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   return (
     <div className={`min-h-screen bg-slate-50 dark:bg-[#0f172a] flex ${theme === 'dark' ? 'dark' : ''} ${isRTL ? 'rtl' : 'ltr'}`} dir={dir}>
@@ -156,6 +182,7 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
           <button
             onClick={() => setMobileMenuOpen(false)}
             className="p-1.5 text-slate-400 hover:text-white rounded-lg transition-colors"
+            aria-label="Close menu"
           >
             <XIcon className="w-5 h-5" />
           </button>
@@ -196,7 +223,8 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
       </aside>
 
       {/* Main Content */}
-      <div className={`flex-1 hidden md:block ${isRTL ? (sidebarOpen ? 'md:mr-64' : 'md:mr-16') : (sidebarOpen ? 'md:ml-64' : 'md:ml-16')} transition-all duration-300`}>        <header className="bg-white dark:bg-[#1e293b] border-b border-slate-200 dark:border-slate-700 px-6 py-3 flex items-center justify-between sticky top-0 z-20">
+      <div className={`flex-1 hidden md:block ${isRTL ? (sidebarOpen ? 'md:mr-64' : 'md:mr-16') : (sidebarOpen ? 'md:ml-64' : 'md:ml-16')} transition-all duration-300`}>
+        <header className="bg-white dark:bg-[#1e293b] border-b border-slate-200 dark:border-slate-700 px-6 py-3 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center gap-3">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
@@ -283,13 +311,13 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
         {/* Mobile Bottom Navigation */}
         <div className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 safe-area-bottom">
           <div className="flex items-center justify-around px-2 py-1">
-            {navItems.slice(0, 5).map(item => (
+            {visibleNavItems.map(item => (
               <button
                 key={item.page}
                 onClick={() => setCurrentPage(item.page)}
                 className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors min-w-0 ${
                   currentPage === item.page
-                    ? 'text-emerald-600 dark:text-emerald-400'
+                    ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
                     : 'text-slate-400 dark:text-slate-500'
                 }`}
               >
@@ -297,9 +325,51 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
                 <span className="text-[10px] font-medium truncate">{t(item.label)}</span>
               </button>
             ))}
+            {hiddenNavItems.length > 0 && (
+              <button
+                onClick={() => setMoreMenuOpen(true)}
+                className={`flex flex-col items-center gap-0.5 px-3 py-2 rounded-lg transition-colors min-w-0 ${
+                  isActiveInMore
+                    ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
+                    : 'text-slate-400 dark:text-slate-500'
+                }`}
+                aria-label="More navigation items"
+              >
+                <MoreIcon className="w-5 h-5" />
+                <span className="text-[10px] font-medium truncate">{t('nav.more') || 'More'}</span>
+              </button>
+            )}
           </div>
         </div>
       </div>
+
+      {/* More Menu - Bottom Sheet */}
+      <Sheet open={moreMenuOpen} onOpenChange={setMoreMenuOpen}>
+        <SheetContent side="bottom" className="rounded-t-2xl max-h-[70vh]">
+          <SheetHeader className="pb-2">
+            <SheetTitle className="text-left">{t('nav.morePages') || 'More Pages'}</SheetTitle>
+            <SheetDescription className="text-left sr-only">
+              {t('nav.morePagesDesc') || 'Additional navigation items'}
+            </SheetDescription>
+          </SheetHeader>
+          <nav className="flex flex-col gap-1 overflow-y-auto max-h-[50vh] p-4 pt-0">
+            {hiddenNavItems.map(item => (
+              <button
+                key={item.page}
+                onClick={() => handleMoreNavigate(item.page)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm transition-colors ${
+                  currentPage === item.page
+                    ? 'bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400'
+                    : 'text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700'
+                }`}
+              >
+                {item.icon}
+                <span>{t(item.label)}</span>
+              </button>
+            ))}
+          </nav>
+        </SheetContent>
+      </Sheet>
 
       {/* Global Search Modal */}
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />

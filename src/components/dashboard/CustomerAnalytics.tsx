@@ -3,6 +3,8 @@
 import React from 'react';
 import { apiFetch } from '@/lib/api';
 import { useFetch } from '@/lib/useFetch';
+import { useI18n } from '@/lib/i18n/context';
+import { useTheme } from 'next-themes';
 import { PackageIcon, DollarIcon, TrendingUpIcon, MapPinIcon, BarChartIcon, ClockIcon, CheckCircleIcon, PlaneIcon, ShipIcon, TruckIcon } from '@/components/icons';
 import { SHIPMENT_STATUS_LABELS, SHIPPING_METHOD_LABELS } from '@/lib/shipping';
 import {
@@ -20,6 +22,7 @@ import {
   ResponsiveContainer,
 } from 'recharts';
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from '@/components/ui/chart';
+import { Button } from '@/components/ui/button';
 
 // ─── Color Palettes ──────────────────────────────────────
 
@@ -59,21 +62,21 @@ const shipmentsChartConfig: ChartConfig = {
 
 // ─── Custom Tooltips ────────────────────────────────────
 
-function ShipmentsTooltip({ active, payload, label }: any) {
+function ShipmentsTooltip({ active, payload, label, isDark }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-xl">
-      <p className="font-medium text-slate-700 mb-1">{label}</p>
-      <p className="text-emerald-700 font-semibold">{payload[0].value} shipments</p>
+    <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs shadow-xl">
+      <p className="font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</p>
+      <p className="text-emerald-700 dark:text-emerald-400 font-semibold">{payload[0].value} shipments</p>
     </div>
   );
 }
 
-function DestinationsTooltip({ active, payload }: any) {
+function DestinationsTooltip({ active, payload, isDark }: any) {
   if (!active || !payload?.length) return null;
   return (
-    <div className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs shadow-xl">
-      <p className="text-emerald-700 font-semibold">{payload[0].value} shipments</p>
+    <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-xs shadow-xl">
+      <p className="text-emerald-700 dark:text-emerald-400 font-semibold">{payload[0].value} shipments</p>
     </div>
   );
 }
@@ -81,7 +84,16 @@ function DestinationsTooltip({ active, payload }: any) {
 // ─── Main Component ─────────────────────────────────────
 
 export default function CustomerAnalytics() {
-  const { data: stats, loading } = useFetch<any>(
+  const { t } = useI18n();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === 'dark';
+
+  // Chart colors that adapt to dark/light mode
+  const gridColor = isDark ? '#334155' : '#e2e8f0';
+  const tickColor = isDark ? '#94a3b8' : '#64748b';
+  const axisColor = isDark ? '#334155' : '#e2e8f0';
+
+  const { data: stats, loading, error, refresh } = useFetch<any>(
     () => apiFetch('/customer/stats').then((r) => (r.success ? r.data : null)),
     []
   );
@@ -91,7 +103,26 @@ export default function CustomerAnalytics() {
       <div className="flex items-center justify-center py-24">
         <div className="flex flex-col items-center gap-3">
           <div className="h-8 w-8 animate-spin rounded-full border-2 border-emerald-600 border-t-transparent" />
-          <span className="text-sm text-slate-400">Loading analytics...</span>
+          <span className="text-sm text-slate-400 dark:text-slate-500">{t('common.loading')}</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-24">
+        <div className="text-center">
+          <BarChartIcon className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-slate-600 dark:text-slate-400">{t('common.error')}</h3>
+          <p className="text-slate-400 dark:text-slate-500 mt-2">{error}</p>
+          <Button
+            onClick={refresh}
+            variant="outline"
+            className="mt-4 border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800"
+          >
+            {t('common.refresh')}
+          </Button>
         </div>
       </div>
     );
@@ -101,9 +132,9 @@ export default function CustomerAnalytics() {
     return (
       <div className="flex items-center justify-center py-24">
         <div className="text-center">
-          <BarChartIcon className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-slate-600">No analytics data available</h3>
-          <p className="text-slate-400 mt-2">Create some shipments to see your analytics</p>
+          <BarChartIcon className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-slate-600 dark:text-slate-400">{t('common.noData')}</h3>
+          <p className="text-slate-400 dark:text-slate-500 mt-2">{t('analytics.createShipmentsHint') || 'Create some shipments to see your analytics'}</p>
         </div>
       </div>
     );
@@ -141,7 +172,7 @@ export default function CustomerAnalytics() {
 
   // Prepare delivery performance data for pie chart
   const perfData = Object.entries(stats.deliveryPerformance || {}).map(([key, value]) => ({
-    name: key === 'onTime' ? 'On Time' : key === 'delayed' ? 'Delayed' : 'Early',
+    name: key === 'onTime' ? (t('analytics.onTime') || 'On Time') : key === 'delayed' ? (t('analytics.delayed') || 'Delayed') : (t('analytics.early') || 'Early'),
     value: value as number,
     key,
     fill: PERFORMANCE_COLORS[key] || '#94a3b8',
@@ -178,62 +209,62 @@ export default function CustomerAnalytics() {
     <div className="space-y-6">
       {/* ── Header ── */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">Analytics Dashboard</h1>
-        <p className="text-slate-500 text-sm">Your shipping performance and insights</p>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">{t('analytics.overview') || 'Analytics Dashboard'}</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-sm">{t('analytics.subtitle') || 'Your shipping performance and insights'}</p>
       </div>
 
       {/* ── Summary Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
           {
-            label: 'Total Shipments',
+            label: t('analytics.totalShipments') || 'Total Shipments',
             value: totalShipments.toLocaleString(),
             icon: <PackageIcon className="w-5 h-5 text-emerald-600" />,
-            bgAccent: 'bg-emerald-50',
+            bgAccent: 'bg-emerald-50 dark:bg-emerald-900/20',
             sparkColor: '#059669',
           },
           {
-            label: 'Total Spent',
+            label: t('analytics.totalSpent') || 'Total Spent',
             value: `$${totalSpent.toLocaleString()}`,
             icon: <DollarIcon className="w-5 h-5 text-sky-600" />,
-            bgAccent: 'bg-sky-50',
+            bgAccent: 'bg-sky-50 dark:bg-sky-900/20',
             sparkColor: '#0284c7',
           },
           {
-            label: 'Average Weight',
+            label: t('analytics.averageWeight') || 'Average Weight',
             value: `${averageWeight} kg`,
             icon: <TrendingUpIcon className="w-5 h-5 text-amber-600" />,
-            bgAccent: 'bg-amber-50',
+            bgAccent: 'bg-amber-50 dark:bg-amber-900/20',
             sparkColor: '#d97706',
           },
           {
-            label: 'Delivery Rate',
+            label: t('analytics.deliveryRate') || 'Delivery Rate',
             value: `${deliveryRate}%`,
             icon: <CheckCircleIcon className="w-5 h-5 text-violet-600" />,
-            bgAccent: 'bg-violet-50',
+            bgAccent: 'bg-violet-50 dark:bg-violet-900/20',
             sparkColor: '#7c3aed',
           },
         ].map((card, i) => (
           <div
             key={i}
-            className="relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 hover:shadow-md transition-shadow group"
+            className="relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 hover:shadow-md transition-shadow group"
           >
             <div className="flex items-center justify-between mb-3">
               <div className={`rounded-lg p-2 ${card.bgAccent}`}>{card.icon}</div>
             </div>
-            <div className="text-2xl font-bold text-slate-900">{card.value}</div>
-            <div className="text-xs text-slate-500 mt-1">{card.label}</div>
+            <div className="text-2xl font-bold text-slate-900 dark:text-white">{card.value}</div>
+            <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{card.label}</div>
           </div>
         ))}
       </div>
 
       {/* ── Charts Row 1: Monthly Shipments (Area) ── */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6">
         <div className="flex items-center gap-2 mb-4">
           <TrendingUpIcon className="w-5 h-5 text-emerald-600" />
-          <h3 className="text-base font-semibold text-slate-900">Shipments Over Time</h3>
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white">{t('analytics.monthlyTrend') || 'Shipments Over Time'}</h3>
         </div>
-        <p className="text-xs text-slate-400 mb-4">Monthly shipment count for the last 12 months</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('analytics.monthlyTrendSubtitle') || 'Monthly shipment count for the last 12 months'}</p>
         <ChartContainer config={shipmentsChartConfig} className="h-[280px] w-full">
           <AreaChart data={monthlyData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
             <defs>
@@ -242,21 +273,21 @@ export default function CustomerAnalytics() {
                 <stop offset="95%" stopColor="#10b981" stopOpacity={0} />
               </linearGradient>
             </defs>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+            <CartesianGrid strokeDasharray="3 3" stroke={gridColor} />
             <XAxis
               dataKey="month"
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              tick={{ fontSize: 11, fill: tickColor }}
               tickLine={false}
-              axisLine={{ stroke: '#e2e8f0' }}
+              axisLine={{ stroke: axisColor }}
               interval="preserveStartEnd"
             />
             <YAxis
-              tick={{ fontSize: 11, fill: '#94a3b8' }}
+              tick={{ fontSize: 11, fill: tickColor }}
               tickLine={false}
               axisLine={false}
               allowDecimals={false}
             />
-            <Tooltip content={<ShipmentsTooltip />} />
+            <Tooltip content={<ShipmentsTooltip isDark={isDark} />} />
             <Area
               type="monotone"
               dataKey="count"
@@ -273,12 +304,12 @@ export default function CustomerAnalytics() {
       {/* ── Charts Row 2: Status Distribution + Shipping Methods ── */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Status Distribution - Donut Chart */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6">
           <div className="flex items-center gap-2 mb-4">
             <BarChartIcon className="w-5 h-5 text-emerald-600" />
-            <h3 className="text-base font-semibold text-slate-900">Status Distribution</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">{t('analytics.shipmentsByStatus') || 'Status Distribution'}</h3>
           </div>
-          <p className="text-xs text-slate-400 mb-4">Shipment breakdown by current status</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('analytics.statusSubtitle') || 'Shipment breakdown by current status'}</p>
           {statusData.length > 0 ? (
             <div className="flex flex-col lg:flex-row items-center gap-4">
               <ChartContainer config={dynamicStatusChartConfig} className="h-[240px] w-full max-w-[240px]">
@@ -303,30 +334,30 @@ export default function CustomerAnalytics() {
               </ChartContainer>
               <div className="flex-1 space-y-1.5 max-h-[240px] overflow-y-auto pr-1 w-full">
                 {statusData.map((s: any) => (
-                  <div key={s.status} className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 transition-colors">
+                  <div key={s.status} className="flex items-center justify-between gap-2 px-2 py-1.5 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                     <div className="flex items-center gap-2 min-w-0">
                       <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: s.fill }} />
-                      <span className="text-xs text-slate-600 truncate">{s.name}</span>
+                      <span className="text-xs text-slate-600 dark:text-slate-400 truncate">{s.name}</span>
                     </div>
-                    <span className="text-xs font-semibold text-slate-800 shrink-0">{s.value}</span>
+                    <span className="text-xs font-semibold text-slate-800 dark:text-slate-200 shrink-0">{s.value}</span>
                   </div>
                 ))}
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-[200px] text-slate-400 text-sm">
-              No status data available
+            <div className="flex items-center justify-center h-[200px] text-slate-400 dark:text-slate-500 text-sm">
+              {t('analytics.noStatusData') || 'No status data available'}
             </div>
           )}
         </div>
 
         {/* Shipping Methods - Pie Chart */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6">
           <div className="flex items-center gap-2 mb-4">
             <ShipIcon className="w-5 h-5 text-emerald-600" />
-            <h3 className="text-base font-semibold text-slate-900">Shipping Methods</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">{t('analytics.shipmentsByMethod') || 'Shipping Methods'}</h3>
           </div>
-          <p className="text-xs text-slate-400 mb-4">Shipment distribution by shipping method</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('analytics.methodSubtitle') || 'Shipment distribution by shipping method'}</p>
           {methodData.length > 0 ? (
             <div className="flex flex-col lg:flex-row items-center gap-4">
               <ChartContainer config={dynamicMethodChartConfig} className="h-[240px] w-full max-w-[240px]">
@@ -362,7 +393,7 @@ export default function CustomerAnalytics() {
                   const total = methodData.reduce((a: number, b: any) => a + b.value, 0);
                   const pct = total > 0 ? Math.round((m.value / total) * 100) : 0;
                   return (
-                    <div key={m.method} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-slate-50 transition-colors">
+                    <div key={m.method} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                       <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center"
                         style={{ backgroundColor: `${m.fill}15` }}
@@ -370,18 +401,18 @@ export default function CustomerAnalytics() {
                         {methodIcon}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-slate-700">{m.name}</div>
-                        <div className="text-xs text-slate-400">{m.value} shipments</div>
+                        <div className="text-sm font-medium text-slate-700 dark:text-slate-300">{m.name}</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500">{m.value} {t('analytics.shipments') || 'shipments'}</div>
                       </div>
-                      <div className="text-lg font-bold text-slate-800">{pct}%</div>
+                      <div className="text-lg font-bold text-slate-800 dark:text-slate-200">{pct}%</div>
                     </div>
                   );
                 })}
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-[200px] text-slate-400 text-sm">
-              No method data available
+            <div className="flex items-center justify-center h-[200px] text-slate-400 dark:text-slate-500 text-sm">
+              {t('analytics.noMethodData') || 'No method data available'}
             </div>
           )}
         </div>
@@ -390,19 +421,19 @@ export default function CustomerAnalytics() {
       {/* ── Charts Row 3: Top Destinations + Delivery Performance ── */}
       <div className="grid lg:grid-cols-2 gap-6">
         {/* Top Destinations - Horizontal Bar Chart */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6">
           <div className="flex items-center gap-2 mb-4">
             <MapPinIcon className="w-5 h-5 text-emerald-600" />
-            <h3 className="text-base font-semibold text-slate-900">Top Destinations</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">{t('analytics.topDestinations') || 'Top Destinations'}</h3>
           </div>
-          <p className="text-xs text-slate-400 mb-4">Top 5 destination countries by shipment volume</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('analytics.destinationsSubtitle') || 'Top 5 destination countries by shipment volume'}</p>
           {destinationData.length > 0 ? (
             <ChartContainer config={dynamicDestChartConfig} className="h-[280px] w-full">
               <BarChart data={destinationData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke={gridColor} horizontal={false} />
                 <XAxis
                   type="number"
-                  tick={{ fontSize: 11, fill: '#94a3b8' }}
+                  tick={{ fontSize: 11, fill: tickColor }}
                   tickLine={false}
                   axisLine={false}
                   allowDecimals={false}
@@ -410,12 +441,12 @@ export default function CustomerAnalytics() {
                 <YAxis
                   type="category"
                   dataKey="country"
-                  tick={{ fontSize: 12, fill: '#475569' }}
+                  tick={{ fontSize: 12, fill: tickColor }}
                   tickLine={false}
                   axisLine={false}
                   width={100}
                 />
-                <Tooltip content={<DestinationsTooltip />} />
+                <Tooltip content={<DestinationsTooltip isDark={isDark} />} />
                 <Bar dataKey="count" radius={[0, 6, 6, 0]} maxBarSize={24}>
                   {destinationData.map((entry: any, index: number) => (
                     <Cell key={`cell-dest-${index}`} fill={entry.fill} />
@@ -424,19 +455,19 @@ export default function CustomerAnalytics() {
               </BarChart>
             </ChartContainer>
           ) : (
-            <div className="flex items-center justify-center h-[200px] text-slate-400 text-sm">
-              No destination data available
+            <div className="flex items-center justify-center h-[200px] text-slate-400 dark:text-slate-500 text-sm">
+              {t('analytics.noDestinationData') || 'No destination data available'}
             </div>
           )}
         </div>
 
         {/* Delivery Performance - Donut Chart */}
-        <div className="rounded-xl border border-slate-200 bg-white p-6">
+        <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6">
           <div className="flex items-center gap-2 mb-4">
             <CheckCircleIcon className="w-5 h-5 text-emerald-600" />
-            <h3 className="text-base font-semibold text-slate-900">Delivery Performance</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white">{t('analytics.deliveryPerformance') || 'Delivery Performance'}</h3>
           </div>
-          <p className="text-xs text-slate-400 mb-4">Estimated delivery performance breakdown</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('analytics.performanceSubtitle') || 'Estimated delivery performance breakdown'}</p>
           {perfData.length > 0 && perfData.some((p: any) => p.value > 0) ? (
             <div className="flex flex-col lg:flex-row items-center gap-4">
               <ChartContainer config={dynamicPerfChartConfig} className="h-[240px] w-full max-w-[240px]">
@@ -467,7 +498,7 @@ export default function CustomerAnalytics() {
                     early: <TrendingUpIcon className="w-5 h-5" />,
                   };
                   return (
-                    <div key={p.key} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-slate-50 transition-colors">
+                    <div key={p.key} className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
                       <div
                         className="w-10 h-10 rounded-lg flex items-center justify-center"
                         style={{ backgroundColor: `${p.fill}15` }}
@@ -475,42 +506,42 @@ export default function CustomerAnalytics() {
                         {icons[p.key] || <CheckCircleIcon className="w-5 h-5" />}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-sm font-medium text-slate-700">{p.name}</div>
-                        <div className="text-xs text-slate-400">{p.value}% of deliveries</div>
+                        <div className="text-sm font-medium text-slate-700 dark:text-slate-300">{p.name}</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500">{p.value}% {t('analytics.ofDeliveries') || 'of deliveries'}</div>
                       </div>
-                      <div className="text-lg font-bold text-slate-800">{p.value}%</div>
+                      <div className="text-lg font-bold text-slate-800 dark:text-slate-200">{p.value}%</div>
                     </div>
                   );
                 })}
               </div>
             </div>
           ) : (
-            <div className="flex items-center justify-center h-[200px] text-slate-400 text-sm">
-              No delivery data available yet
+            <div className="flex items-center justify-center h-[200px] text-slate-400 dark:text-slate-500 text-sm">
+              {t('analytics.noDeliveryData') || 'No delivery data available yet'}
             </div>
           )}
         </div>
       </div>
 
       {/* ── Recent Activity ── */}
-      <div className="rounded-xl border border-slate-200 bg-white p-6">
+      <div className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6">
         <div className="flex items-center gap-2 mb-4">
           <ClockIcon className="w-5 h-5 text-emerald-600" />
-          <h3 className="text-base font-semibold text-slate-900">Recent Activity</h3>
+          <h3 className="text-base font-semibold text-slate-900 dark:text-white">{t('analytics.recentActivity') || 'Recent Activity'}</h3>
         </div>
-        <p className="text-xs text-slate-400 mb-4">Latest 5 tracking events from your shipments</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('analytics.recentActivitySubtitle') || 'Latest 5 tracking events from your shipments'}</p>
         {(stats.recentActivity || []).length > 0 ? (
           <div className="space-y-3">
             {(stats.recentActivity || []).map((event: any, index: number) => (
               <div
                 key={index}
-                className="flex items-start gap-3 px-3 py-3 rounded-lg hover:bg-slate-50 transition-colors border border-slate-100"
+                className="flex items-start gap-3 px-3 py-3 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors border border-slate-100 dark:border-slate-700"
               >
                 <div className="w-2 h-2 rounded-full bg-emerald-500 mt-2 shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="text-sm font-medium text-slate-900 font-mono">{event.shipmentId}</span>
+                      <span className="text-sm font-medium text-slate-900 dark:text-white font-mono">{event.shipmentId}</span>
                       <span
                         className="inline-flex px-2 py-0.5 text-xs font-medium rounded-full"
                         style={{
@@ -521,31 +552,31 @@ export default function CustomerAnalytics() {
                         {SHIPMENT_STATUS_LABELS[event.status] || event.status}
                       </span>
                     </div>
-                    <span className="text-xs text-slate-400 shrink-0">
+                    <span className="text-xs text-slate-400 dark:text-slate-500 shrink-0">
                       {new Date(event.timestamp).toLocaleString()}
                     </span>
                   </div>
                   <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs text-slate-500 dark:text-slate-400">
                       <MapPinIcon className="w-3 h-3 inline mr-1" />
                       {event.location}
                     </span>
                     {event.destination && (
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs text-slate-400 dark:text-slate-500">
                         → {event.destination}
                       </span>
                     )}
                   </div>
                   {event.notes && (
-                    <p className="text-xs text-slate-400 mt-1">{event.notes}</p>
+                    <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{event.notes}</p>
                   )}
                 </div>
               </div>
             ))}
           </div>
         ) : (
-          <div className="flex items-center justify-center h-[120px] text-slate-400 text-sm">
-            No recent activity found
+          <div className="flex items-center justify-center h-[120px] text-slate-400 dark:text-slate-500 text-sm">
+            {t('analytics.noRecentActivity') || 'No recent activity found'}
           </div>
         )}
       </div>

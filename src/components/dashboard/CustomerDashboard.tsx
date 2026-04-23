@@ -6,7 +6,7 @@ import { useAppStore } from '@/lib/store';
 import { useI18n } from '@/lib/i18n/context';
 import { apiFetch } from '@/lib/api';
 import { useFetch } from '@/lib/useFetch';
-import { PackageIcon, PlusIcon, RefreshIcon, MapPinIcon, ClockIcon, PlaneIcon, ShipIcon, TruckIcon, DollarIcon, FileTextIcon, SearchIcon, CheckCircleIcon, TrendingUpIcon } from '@/components/icons';
+import { PackageIcon, PlusIcon, RefreshIcon, MapPinIcon, ClockIcon, PlaneIcon, ShipIcon, TruckIcon, DollarIcon, FileTextIcon, SearchIcon, CheckCircleIcon, TrendingUpIcon, AlertIcon } from '@/components/icons';
 import { SHIPMENT_STATUS_LABELS, SHIPMENT_STATUS_COLORS, SHIPPING_METHOD_LABELS } from '@/lib/shipping';
 import { SkeletonTable } from '@/components/shared/SkeletonLoaders';
 import AutoRefresh from '@/components/shared/AutoRefresh';
@@ -153,16 +153,16 @@ export default function CustomerDashboard() {
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.15),transparent)] pointer-events-none" />
         <div className="relative z-10">
-          <h1 className="text-xl sm:text-2xl font-bold mb-1">Welcome back, {user?.name || 'User'}!</h1>
-          <p className="text-emerald-100 text-sm">Here&apos;s an overview of your shipping activity.</p>
+          <h1 className="text-xl sm:text-2xl font-bold mb-1">{t('dashboard.welcomeBack') || 'Welcome back'}, {user?.name || 'User'}!</h1>
+          <p className="text-emerald-100 text-sm">{t('dashboard.overview') || "Here's an overview of your shipping activity."}</p>
 
           {/* Quick Stats Row */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6">
             {[
               { label: t('common.total'), value: stats.total, icon: <PackageIcon className="w-4 h-4" /> },
-              { label: 'In Transit', value: stats.inTransit, icon: <TruckIcon className="w-4 h-4" /> },
-              { label: 'Processing', value: stats.processing, icon: <ClockIcon className="w-4 h-4" /> },
-              { label: 'Delivered', value: stats.delivered, icon: <CheckCircleIcon className="w-4 h-4" /> },
+              { label: t('status.inTransit') || 'In Transit', value: stats.inTransit, icon: <TruckIcon className="w-4 h-4" /> },
+              { label: t('status.processing') || 'Processing', value: stats.processing, icon: <ClockIcon className="w-4 h-4" /> },
+              { label: t('status.delivered') || 'Delivered', value: stats.delivered, icon: <CheckCircleIcon className="w-4 h-4" /> },
             ].map((stat, i) => (
               <div key={i} className="bg-white/10 backdrop-blur-sm rounded-lg p-3 border border-white/10">
                 <div className="flex items-center gap-1.5 mb-1">
@@ -219,16 +219,16 @@ export default function CustomerDashboard() {
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <DollarIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Spending Overview</h3>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t('dashboard.spendingOverview') || 'Spending Overview'}</h3>
             </div>
-            <span className="text-xs text-slate-400">Last 6 months</span>
+            <span className="text-xs text-slate-400">{t('dashboard.last6Months') || 'Last 6 months'}</span>
           </div>
           <div className="flex items-end justify-between">
             <div>
               <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${stats.totalSpent.toLocaleString()}
               </div>
-              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">Total shipment value</div>
+              <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('dashboard.totalShipmentValue') || 'Total shipment value'}</div>
             </div>
             <MiniChart data={spendingData} />
           </div>
@@ -243,12 +243,12 @@ export default function CustomerDashboard() {
         >
           <div className="flex items-center gap-2 mb-4">
             <TrendingUpIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">Shipment Status Summary</h3>
+            <h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">{t('dashboard.statusSummary') || 'Shipment Status Summary'}</h3>
           </div>
           {shipments.length > 0 ? (
             <StatusBar shipments={shipments} />
           ) : (
-            <div className="text-center py-4 text-sm text-slate-400">No shipments to display</div>
+            <div className="text-center py-4 text-sm text-slate-400">{t('dashboard.noShipmentsDisplay') || 'No shipments to display'}</div>
           )}
         </motion.div>
       </div>
@@ -274,6 +274,15 @@ export default function CustomerDashboard() {
 
         {loading ? (
           <SkeletonTable rows={4} columns={5} />
+        ) : shipmentData === null && !loading ? (
+          <div className="text-center py-16 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+            <AlertIcon className="w-16 h-16 text-red-300 dark:text-red-500 mx-auto mb-4" />
+            <h3 className="text-lg font-medium text-slate-600 dark:text-slate-400">{t('dashboard.failedLoadShipments') || 'Failed to load shipments'}</h3>
+            <p className="text-slate-400 dark:text-slate-500 mt-2">{t('common.tryAgainLater') || 'Something went wrong. Please try again.'}</p>
+            <button onClick={() => refresh()} className="mt-4 px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition-colors">
+              <span className="flex items-center gap-2"><RefreshIcon className="w-4 h-4" /> {t('common.tryAgain') || 'Try Again'}</span>
+            </button>
+          </div>
         ) : shipments.length === 0 ? (
           <div className="text-center py-16 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
             <PackageIcon className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
@@ -408,12 +417,12 @@ export default function CustomerDashboard() {
                 <table className="w-full">
                   <thead className="bg-slate-50 dark:bg-slate-900 border-b border-slate-200 dark:border-slate-700">
                     <tr>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Shipment ID</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Destination</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Method</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Weight</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Status</th>
-                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">Date</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">{t('shipment.shipmentId') || 'Shipment ID'}</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">{t('shipment.destination') || 'Destination'}</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">{t('shipment.method') || 'Method'}</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">{t('shipment.weight') || 'Weight'}</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">{t('common.status') || 'Status'}</th>
+                      <th className="text-left px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">{t('common.date') || 'Date'}</th>
                       <th className="text-right px-4 py-3 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase">{t('common.actions')}</th>
                     </tr>
                   </thead>

@@ -1,49 +1,49 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { useAppStore, AppPage } from '@/lib/store';
 import { apiFetch } from '@/lib/api';
-import { toast } from 'sonner';
 import { I18nProvider, useI18n } from '@/lib/i18n';
 
-// Page components
-import LandingPage from '@/components/landing/LandingPage';
-import LoginPage from '@/components/auth/LoginPage';
-import RegisterPage from '@/components/auth/RegisterPage';
-import ForgotPasswordPage from '@/components/auth/ForgotPasswordPage';
-import ResetPasswordPage from '@/components/auth/ResetPasswordPage';
-import DashboardLayout from '@/components/dashboard/DashboardLayout';
-import CustomerDashboard from '@/components/dashboard/CustomerDashboard';
-import CreateShipmentPage from '@/components/dashboard/CreateShipmentPage';
-import ShipmentDetailPage from '@/components/dashboard/ShipmentDetailPage';
-import InvoicePage from '@/components/dashboard/InvoicePage';
-import PaymentPage from '@/components/dashboard/PaymentPage';
-import ProfilePage from '@/components/dashboard/ProfilePage';
-import CustomerAnalytics from '@/components/dashboard/CustomerAnalytics';
-import AdminDashboard from '@/components/admin/AdminDashboard';
-import AdminShipments from '@/components/admin/AdminShipments';
-import AdminRoutes from '@/components/admin/AdminRoutes';
-import AdminCountries from '@/components/admin/AdminCountries';
-import AdminWarehouses from '@/components/admin/AdminWarehouses';
-import AdminUsers from '@/components/admin/AdminUsers';
-import AdminAuditLogs from '@/components/admin/AdminAuditLogs';
-import AdminShippingMethods from '@/components/admin/AdminShippingMethods';
-import AdminReports from '@/components/admin/AdminReports';
-import AdminSettings from '@/components/admin/AdminSettings';
-import AdminPayments from '@/components/admin/AdminPayments';
-import AdminFinanceDashboard from '@/components/admin/AdminFinanceDashboard';
-import AdminTickets from '@/components/admin/AdminTickets';
-import AdminQuotations from '@/components/admin/AdminQuotations';
-import SupportTickets from '@/components/dashboard/SupportTickets';
-import QuotationPage from '@/components/dashboard/QuotationPage';
-import WarehouseDashboard from '@/components/warehouse/WarehouseDashboard';
-import WarehousePortal from '@/components/warehouse/WarehousePortal';
-import PublicTrackingPage from '@/components/tracking/PublicTrackingPage';
-import ErrorBoundary from '@/components/shared/ErrorBoundary';
-import AIChatWidget from '@/components/shared/AIChatWidget';
-import RealtimeProvider from '@/components/shared/RealtimeProvider';
-import ShipmentMap from '@/components/shared/ShipmentMap';
+// Lazy-loaded page components for code splitting
+const LandingPage = lazy(() => import('@/components/landing/LandingPage'));
+const LoginPage = lazy(() => import('@/components/auth/LoginPage'));
+const RegisterPage = lazy(() => import('@/components/auth/RegisterPage'));
+const ForgotPasswordPage = lazy(() => import('@/components/auth/ForgotPasswordPage'));
+const ResetPasswordPage = lazy(() => import('@/components/auth/ResetPasswordPage'));
+const DashboardLayout = lazy(() => import('@/components/dashboard/DashboardLayout'));
+const CustomerDashboard = lazy(() => import('@/components/dashboard/CustomerDashboard'));
+const CreateShipmentPage = lazy(() => import('@/components/dashboard/CreateShipmentPage'));
+const ShipmentDetailPage = lazy(() => import('@/components/dashboard/ShipmentDetailPage'));
+const InvoicePage = lazy(() => import('@/components/dashboard/InvoicePage'));
+const PaymentPage = lazy(() => import('@/components/dashboard/PaymentPage'));
+const ProfilePage = lazy(() => import('@/components/dashboard/ProfilePage'));
+const CustomerAnalytics = lazy(() => import('@/components/dashboard/CustomerAnalytics'));
+const AdminDashboard = lazy(() => import('@/components/admin/AdminDashboard'));
+const AdminShipments = lazy(() => import('@/components/admin/AdminShipments'));
+const AdminRoutes = lazy(() => import('@/components/admin/AdminRoutes'));
+const AdminCountries = lazy(() => import('@/components/admin/AdminCountries'));
+const AdminWarehouses = lazy(() => import('@/components/admin/AdminWarehouses'));
+const AdminUsers = lazy(() => import('@/components/admin/AdminUsers'));
+const AdminAuditLogs = lazy(() => import('@/components/admin/AdminAuditLogs'));
+const AdminShippingMethods = lazy(() => import('@/components/admin/AdminShippingMethods'));
+const AdminReports = lazy(() => import('@/components/admin/AdminReports'));
+const AdminSettings = lazy(() => import('@/components/admin/AdminSettings'));
+const AdminPayments = lazy(() => import('@/components/admin/AdminPayments'));
+const AdminFinanceDashboard = lazy(() => import('@/components/admin/AdminFinanceDashboard'));
+const AdminTickets = lazy(() => import('@/components/admin/AdminTickets'));
+const AdminQuotations = lazy(() => import('@/components/admin/AdminQuotations'));
+const SupportTickets = lazy(() => import('@/components/dashboard/SupportTickets'));
+const QuotationPage = lazy(() => import('@/components/dashboard/QuotationPage'));
+const WarehouseDashboard = lazy(() => import('@/components/warehouse/WarehouseDashboard'));
+const WarehousePortal = lazy(() => import('@/components/warehouse/WarehousePortal'));
+const PublicTrackingPage = lazy(() => import('@/components/tracking/PublicTrackingPage'));
+const ErrorBoundary = lazy(() => import('@/components/shared/ErrorBoundary'));
+const AIChatWidget = lazy(() => import('@/components/shared/AIChatWidget'));
+const RealtimeProvider = lazy(() => import('@/components/shared/RealtimeProvider'));
+const ShipmentMap = lazy(() => import('@/components/shared/ShipmentMap'));
+// These are small shared components — eager import is fine
 import { ShippingLabelPage } from '@/components/shared/ShippingLabel';
 import { BackToTopButton } from '@/components/shared/BackToTopButton';
 
@@ -91,6 +91,18 @@ const warehouseNavItems = [
   { page: 'warehouse-shipments' as AppPage, label: 'nav.shipments', icon: <PackageIcon className="w-5 h-5" /> },
   { page: 'profile' as AppPage, label: 'nav.profile', icon: <UserIcon className="w-5 h-5" /> },
 ];
+
+// Page loading fallback
+function PageLoader() {
+  return (
+    <div className="flex items-center justify-center min-h-[40vh]">
+      <div className="flex flex-col items-center gap-3">
+        <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+        <span className="text-slate-400 text-sm">Loading...</span>
+      </div>
+    </div>
+  );
+}
 
 function AdminContent({ currentPage }: { currentPage: AppPage }) {
   switch (currentPage) {
@@ -166,7 +178,7 @@ function ShippingLabelPageWrapper() {
   }, [labelShipmentIds]);
 
   if (loading) return (
-    <div className="min-h-screen bg-white flex items-center justify-center">
+    <div className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center">
       <div className="flex flex-col items-center gap-3">
         <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
         <p className="text-slate-400 text-sm">{t('labels.loadingLabels')}</p>
@@ -175,6 +187,48 @@ function ShippingLabelPageWrapper() {
   );
 
   return <ShippingLabelPage labels={labels} onClose={() => setCurrentPage('dashboard')} />;
+}
+
+// Session restoring loader
+function SessionLoader({ children }: { children: React.ReactNode }) {
+  const { token, user, setUser } = useAppStore();
+  const [restoring, setRestoring] = useState(!!(token && !user));
+
+  useEffect(() => {
+    if (token && !user) {
+      apiFetch('/auth/me').then(res => {
+        if (res.success && res.data?.user) {
+          setUser(res.data.user, token);
+        } else {
+          setUser(null, null);
+        }
+      }).catch(() => {
+        setUser(null, null);
+      }).finally(() => {
+        setRestoring(false);
+      });
+    }
+  }, [token, user, setUser]);
+
+  if (restoring) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-[#0f172a]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
+            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+            </svg>
+          </div>
+          <div className="flex flex-col items-center gap-2">
+            <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+            <span className="text-slate-400 text-sm">Restoring session...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return <>{children}</>;
 }
 
 // Page transition variants
@@ -194,21 +248,6 @@ export default function App() {
   const { currentPage, user, token, setUser, setCurrentPage } = useAppStore();
   const mainRef = useRef<HTMLDivElement>(null);
   const prevPageRef = useRef<AppPage>(currentPage);
-
-  // Restore session on mount
-  useEffect(() => {
-    if (token && !user) {
-      apiFetch('/auth/me').then(res => {
-        if (res.success && res.data?.user) {
-          setUser(res.data.user, token);
-        } else {
-          setUser(null, null);
-        }
-      }).catch(() => {
-        setUser(null, null);
-      });
-    }
-  }, []);
 
   // Scroll to top on page change
   useEffect(() => {
@@ -284,24 +323,30 @@ export default function App() {
   return (
     <I18nProvider>
       <ErrorBoundary>
-        <RealtimeProvider>
-          <div ref={mainRef}>
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={currentPage}
-                variants={pageVariants}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                transition={pageTransition}
-              >
-                {content}
-              </motion.div>
-            </AnimatePresence>
-          </div>
-          <AIChatWidget />
-          <BackToTopButton />
-        </RealtimeProvider>
+        <SessionLoader>
+          <RealtimeProvider>
+            <div ref={mainRef} id="main-content">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={currentPage}
+                  variants={pageVariants}
+                  initial="initial"
+                  animate="animate"
+                  exit="exit"
+                  transition={pageTransition}
+                >
+                  <Suspense fallback={<PageLoader />}>
+                    {content}
+                  </Suspense>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            <Suspense fallback={null}>
+              <AIChatWidget />
+            </Suspense>
+            <BackToTopButton />
+          </RealtimeProvider>
+        </SessionLoader>
       </ErrorBoundary>
     </I18nProvider>
   );

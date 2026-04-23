@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "sonner";
 import { ThemeProvider } from "next-themes";
@@ -23,6 +23,12 @@ export const metadata: Metadata = {
   },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,12 +39,18 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground`}
       >
+        {/* Skip to content link for accessibility */}
+        <a href="#main-content" className="skip-to-content">
+          Skip to content
+        </a>
         <ThemeProvider
           attribute="class"
           defaultTheme="light"
           enableSystem
           disableTransitionOnChange
         >
+          {/* Aria-live region for dynamic announcements */}
+          <div aria-live="polite" aria-atomic="true" className="sr-only" id="aria-announcements" />
           {children}
           <Toaster position="top-right" richColors />
         </ThemeProvider>

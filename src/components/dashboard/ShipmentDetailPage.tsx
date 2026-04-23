@@ -23,9 +23,17 @@ import {
 } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { useI18n } from '@/lib/i18n/context';
+
+function escapeHtml(str: string): string {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
 
 export default function ShipmentDetailPage() {
   const { selectedShipmentId, setCurrentPage, user, setLabelShipmentIds } = useAppStore();
+  const { t } = useI18n();
   const [shipment, setShipment] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [shareOpen, setShareOpen] = useState(false);
@@ -45,7 +53,7 @@ export default function ShipmentDetailPage() {
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
-    toast.success('Copied to clipboard!');
+    toast.success(t('common.copied') || 'Copied to clipboard!');
   };
 
   const handleDownloadQR = async () => {
@@ -63,7 +71,7 @@ export default function ShipmentDetailPage() {
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success('QR Code downloaded!');
+      toast.success(t('common.download') + ' QR Code');
     } catch {
       toast.error('Failed to download QR code');
     }
@@ -97,11 +105,29 @@ export default function ShipmentDetailPage() {
     const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(trackingUrl)}`;
     const printWindow = window.open('', '_blank');
     if (printWindow) {
+      const safeShipmentId = escapeHtml(shipment.shipmentId || '');
+      const safeShippingMethod = escapeHtml(SHIPPING_METHOD_LABELS[shipment.shippingMethod] || '');
+      const safeShipmentType = escapeHtml(SHIPMENT_TYPE_LABELS[shipment.shipmentType] || '');
+      const safeWeight = escapeHtml(String(shipment.weight ?? ''));
+      const safeLength = escapeHtml(String(shipment.length ?? ''));
+      const safeWidth = escapeHtml(String(shipment.width ?? ''));
+      const safeHeight = escapeHtml(String(shipment.height ?? ''));
+      const safeValue = escapeHtml(String(shipment.shipmentValue ?? ''));
+      const safeProduct = escapeHtml(shipment.productDescription || '');
+      const safeDestCity = escapeHtml(shipment.destinationCity || '');
+      const safeDestCountry = escapeHtml(shipment.destinationCountry || '');
+      const safeSenderName = escapeHtml(shipment.senderName || '');
+      const safeSenderPhone = escapeHtml(shipment.senderPhone || '');
+      const safeReceiverName = escapeHtml(shipment.receiverName || '');
+      const safeReceiverPhone = escapeHtml(shipment.receiverPhone || '');
+      const safeReceiverAddress = escapeHtml(shipment.receiverAddress || '');
+      const safeTrackingNumber = escapeHtml(shipment.trackingNumber || '');
+
       printWindow.document.write(`
         <!DOCTYPE html>
         <html>
         <head>
-          <title>Shipping Label - ${shipment.shipmentId}</title>
+          <title>Shipping Label - ${safeShipmentId}</title>
           <style>
             * { margin: 0; padding: 0; box-sizing: border-box; }
             body { font-family: Arial, sans-serif; padding: 20px; }
@@ -129,17 +155,17 @@ export default function ShipmentDetailPage() {
           <div class="label">
             <div class="header">
               <div class="logo">ARWA LOGISTICS</div>
-              <div class="shipment-id">${shipment.shipmentId}</div>
+              <div class="shipment-id">${safeShipmentId}</div>
             </div>
             <div class="qr-section">
               <img src="${qrUrl}" alt="QR Code" class="qr-img" />
               <div class="info">
-                <div class="info-row"><span class="info-label">Method:</span> ${SHIPPING_METHOD_LABELS[shipment.shippingMethod]}</div>
-                <div class="info-row"><span class="info-label">Type:</span> ${SHIPMENT_TYPE_LABELS[shipment.shipmentType]}</div>
-                <div class="info-row"><span class="info-label">Weight:</span> ${shipment.weight} kg</div>
-                ${shipment.length ? `<div class="info-row"><span class="info-label">Dims:</span> ${shipment.length}x${shipment.width}x${shipment.height} cm</div>` : ''}
-                <div class="info-row"><span class="info-label">Value:</span> $${shipment.shipmentValue}</div>
-                <div class="info-row"><span class="info-label">Product:</span> ${shipment.productDescription}</div>
+                <div class="info-row"><span class="info-label">Method:</span> ${safeShippingMethod}</div>
+                <div class="info-row"><span class="info-label">Type:</span> ${safeShipmentType}</div>
+                <div class="info-row"><span class="info-label">Weight:</span> ${safeWeight} kg</div>
+                ${shipment.length ? `<div class="info-row"><span class="info-label">Dims:</span> ${safeLength}x${safeWidth}x${safeHeight} cm</div>` : ''}
+                <div class="info-row"><span class="info-label">Value:</span> $${safeValue}</div>
+                <div class="info-row"><span class="info-label">Product:</span> ${safeProduct}</div>
               </div>
             </div>
             <div class="section">
@@ -147,19 +173,19 @@ export default function ShipmentDetailPage() {
               <div class="route">
                 <span>China</span>
                 <span class="route-arrow">&rarr;</span>
-                <span>${shipment.destinationCity}, ${shipment.destinationCountry}</span>
+                <span>${safeDestCity}, ${safeDestCountry}</span>
               </div>
             </div>
             <div class="section">
               <h3>Sender</h3>
-              <div>${shipment.senderName}${shipment.senderPhone ? ` - ${shipment.senderPhone}` : ''}</div>
+              <div>${safeSenderName}${shipment.senderPhone ? ` - ${safeSenderPhone}` : ''}</div>
             </div>
             <div class="section">
               <h3>Receiver</h3>
-              <div>${shipment.receiverName}${shipment.receiverPhone ? ` - ${shipment.receiverPhone}` : ''}</div>
-              <div>${shipment.receiverAddress || ''}</div>
+              <div>${safeReceiverName}${shipment.receiverPhone ? ` - ${safeReceiverPhone}` : ''}</div>
+              <div>${safeReceiverAddress}</div>
             </div>
-            <div class="tracking">${shipment.trackingNumber}</div>
+            <div class="tracking">${safeTrackingNumber}</div>
           </div>
           <script>window.onload = function() { window.print(); }</script>
         </body>
@@ -185,7 +211,7 @@ export default function ShipmentDetailPage() {
     </div>
   );
   if (!shipment) return (
-    <div className="text-center py-12 text-slate-400 dark:text-slate-500">Shipment not found</div>
+    <div className="text-center py-12 text-slate-400 dark:text-slate-500">{t('shipment.noShipments')}</div>
   );
 
   const progress = getStatusProgress(shipment.status);
@@ -201,7 +227,7 @@ export default function ShipmentDetailPage() {
         onClick={() => setCurrentPage('dashboard')}
         className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 mb-6 text-sm transition-colors"
       >
-        <ArrowLeftIcon className="w-4 h-4" /> Back
+        <ArrowLeftIcon className="w-4 h-4" /> {t('common.back')}
       </button>
 
       {/* Header Card */}
@@ -215,35 +241,35 @@ export default function ShipmentDetailPage() {
               </span>
             </div>
             <p className="text-slate-500 dark:text-slate-400">
-              Tracking: <span className="font-mono text-emerald-600 dark:text-emerald-400 cursor-pointer hover:underline" onClick={() => copyToClipboard(shipment.trackingNumber)}>{shipment.trackingNumber}</span>
+              {t('shipment.tracking')}: <span className="font-mono text-emerald-600 dark:text-emerald-400 cursor-pointer hover:underline" onClick={() => copyToClipboard(shipment.trackingNumber)}>{shipment.trackingNumber}</span>
               <ClipboardIcon className="w-3 h-3 inline text-slate-400 dark:text-slate-500 ml-1" />
             </p>
           </div>
           <div className="flex flex-wrap gap-2 w-full sm:w-auto">
             <button onClick={handlePrintLabel} className="flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 text-sm transition-colors">
-              <PrintIcon className="w-4 h-4" /> Print Label
+              <PrintIcon className="w-4 h-4" /> {t('shipment.printLabel')}
             </button>
             <button onClick={() => setCurrentPage('invoice')} className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-slate-700 text-emerald-600 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-800 rounded-lg hover:bg-emerald-50 dark:hover:bg-slate-600 text-sm transition-colors">
-              <FileTextIcon className="w-4 h-4" /> Invoice
+              <FileTextIcon className="w-4 h-4" /> {t('shipment.invoice')}
             </button>
 
             {/* Share Tracking Dialog */}
             <Dialog open={shareOpen} onOpenChange={setShareOpen}>
               <DialogTrigger asChild>
                 <button className="flex items-center gap-2 px-3 py-2 bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-600 text-sm transition-colors">
-                  <ShareIcon className="w-4 h-4" /> Share
+                  <ShareIcon className="w-4 h-4" /> {t('common.share') || 'Share'}
                 </button>
               </DialogTrigger>
               <DialogContent className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700">
                 <DialogHeader>
-                  <DialogTitle className="text-slate-900 dark:text-white">Share Tracking Link</DialogTitle>
+                  <DialogTitle className="text-slate-900 dark:text-white">{t('shipment.shareTracking') || 'Share Tracking Link'}</DialogTitle>
                   <DialogDescription className="text-slate-500 dark:text-slate-400">
-                    Share this tracking link with your customer or team members.
+                    {t('shipment.shareTrackingDesc') || 'Share this tracking link with your customer or team members.'}
                   </DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-2">
                   <div>
-                    <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">Tracking URL</label>
+                    <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">{t('shipment.tracking')} URL</label>
                     <div className="flex gap-2">
                       <Input
                         readOnly
@@ -261,7 +287,7 @@ export default function ShipmentDetailPage() {
                     </div>
                   </div>
                   <div>
-                    <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">Tracking Number</label>
+                    <label className="text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 block">{t('shipment.trackingNumber')}</label>
                     <div className="flex gap-2">
                       <Input
                         readOnly
@@ -284,7 +310,7 @@ export default function ShipmentDetailPage() {
                     href={mailtoLink}
                     className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 text-sm transition-colors"
                   >
-                    <MailIcon className="w-4 h-4" /> Share via Email
+                    <MailIcon className="w-4 h-4" /> {t('shipment.shareViaEmail') || 'Share via Email'}
                   </a>
                 </DialogFooter>
               </DialogContent>
@@ -295,7 +321,7 @@ export default function ShipmentDetailPage() {
         {/* Progress Bar */}
         <div className="mt-6">
           <div className="flex justify-between text-xs text-slate-400 dark:text-slate-500 mb-2">
-            <span>Progress</span>
+            <span>{t('tracking.progress')}</span>
             <span>{Math.round(progress)}%</span>
           </div>
           <div className="w-full h-3 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
@@ -305,7 +331,7 @@ export default function ShipmentDetailPage() {
             {STATUS_FLOW.map((status, i) => (
               <div key={status} className="text-center">
                 <div className={`w-2 h-2 rounded-full mx-auto mb-1 ${i <= currentStatusIdx ? 'bg-emerald-500' : 'bg-slate-200 dark:bg-slate-600'}`} />
-                <span className={`text-[8px] leading-tight block ${i <= currentStatusIdx ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-slate-300 dark:text-slate-600'}`}>
+                <span className={`text-[10px] leading-tight block ${i <= currentStatusIdx ? 'text-emerald-600 dark:text-emerald-400 font-medium' : 'text-slate-300 dark:text-slate-600'}`}>
                   {SHIPMENT_STATUS_LABELS[status].split(' ')[0]}
                 </span>
               </div>
@@ -318,9 +344,9 @@ export default function ShipmentDetailPage() {
       <Dialog open={showLabelPreview} onOpenChange={setShowLabelPreview}>
         <DialogContent className="bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 max-w-lg">
           <DialogHeader>
-            <DialogTitle className="text-slate-900 dark:text-white">Shipping Label Preview</DialogTitle>
+            <DialogTitle className="text-slate-900 dark:text-white">{t('shipment.printLabel') + ' ' + t('common.details') || 'Shipping Label Preview'}</DialogTitle>
             <DialogDescription className="text-slate-500 dark:text-slate-400">
-              Preview of your shipping label. Click Print to generate a printable version.
+              {t('shipment.labelPreviewDesc') || 'Preview of your shipping label. Click Print to generate a printable version.'}
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
@@ -331,7 +357,7 @@ export default function ShipmentDetailPage() {
             ) : labelData ? (
               <ShippingLabel data={labelData} mode="inline" />
             ) : (
-              <div className="text-center py-8 text-slate-400">Failed to load label</div>
+              <div className="text-center py-8 text-slate-400">{t('common.error') || 'Failed to load label'}</div>
             )}
           </div>
           <DialogFooter>
@@ -340,7 +366,7 @@ export default function ShipmentDetailPage() {
               onClick={() => setShowLabelPreview(false)}
               className="border-slate-200 dark:border-slate-600"
             >
-              Close
+              {t('common.close')}
             </Button>
             <Button
               onClick={() => {
@@ -349,7 +375,7 @@ export default function ShipmentDetailPage() {
               }}
               className="bg-emerald-600 hover:bg-emerald-500 text-white"
             >
-              <PrintIcon className="w-4 h-4 mr-2" /> Print Label
+              <PrintIcon className="w-4 h-4 mr-2" /> {t('shipment.printLabel')}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -360,7 +386,7 @@ export default function ShipmentDetailPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Shipment Status Timeline */}
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-5">Shipment Status</h3>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-5">{t('shipment.status')}</h3>
             <div className="relative">
               {STATUS_FLOW.map((status, i) => {
                 const isCompleted = i < currentStatusIdx;
@@ -403,7 +429,7 @@ export default function ShipmentDetailPage() {
                         {SHIPMENT_STATUS_LABELS[status]}
                         {isCurrent && (
                           <span className="ml-2 inline-flex items-center px-2 py-0.5 text-[10px] font-semibold rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 uppercase tracking-wider">
-                            Current
+                            {t('tracking.current')}
                           </span>
                         )}
                       </p>
@@ -414,9 +440,9 @@ export default function ShipmentDetailPage() {
                           {trackingEvent.notes && <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{trackingEvent.notes}</p>}
                         </div>
                       ) : isCompleted ? (
-                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">Completed</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500 mt-1">{t('common.completed')}</p>
                       ) : isFuture ? (
-                        <p className="text-xs text-slate-300 dark:text-slate-600 mt-1">Pending</p>
+                        <p className="text-xs text-slate-300 dark:text-slate-600 mt-1">{t('common.pending')}</p>
                       ) : null}
                     </div>
                   </div>
@@ -428,7 +454,7 @@ export default function ShipmentDetailPage() {
           {/* Tracking Events Timeline */}
           {(shipment.trackingEvents || []).length > 0 && (
             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
-              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Tracking Events</h3>
+              <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">{t('tracking.timeline') || 'Tracking Events'}</h3>
               <div className="space-y-0">
                 {(shipment.trackingEvents || []).map((event: any, i: number) => (
                   <div key={i} className="flex gap-3 sm:gap-4">
@@ -454,7 +480,7 @@ export default function ShipmentDetailPage() {
           {(shipment.photos && shipment.photos.length > 0) && (
             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                <CameraIcon className="w-5 h-5" /> Shipment Photos
+                <CameraIcon className="w-5 h-5" /> {t('shipment.photos')}
               </h3>
               {user && (user.role === 'ADMIN' || user.role === 'WAREHOUSE_STAFF') ? (
                 <PhotoGallery
@@ -478,7 +504,7 @@ export default function ShipmentDetailPage() {
           {user && (user.role === 'ADMIN' || user.role === 'WAREHOUSE_STAFF') && (
             <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
               <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
-                <CameraIcon className="w-5 h-5" /> Upload Photos
+                <CameraIcon className="w-5 h-5" /> {t('shipment.uploadPhoto')}
               </h3>
               <PhotoUploader
                 shipmentId={shipment.id}
@@ -500,49 +526,49 @@ export default function ShipmentDetailPage() {
           {/* QR Code */}
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6 text-center">
             <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4 flex items-center justify-center gap-2">
-              <QRIcon className="w-5 h-5" /> QR Code
+              <QRIcon className="w-5 h-5" /> {t('labels.qrCode')}
             </h3>
             <img
               ref={qrImgRef}
               src={qrApiUrl}
-              alt="QR Code"
+              alt={t('labels.qrCode')}
               className="mx-auto mb-3 rounded-lg"
               width={180}
               height={180}
             />
-            <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Scan to track shipment</p>
+            <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('labels.scanToTrack')}</p>
             <div className="flex flex-col gap-2">
               <button
                 onClick={handleDownloadQR}
                 className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 text-sm transition-colors"
               >
-                <DownloadIcon className="w-4 h-4" /> Download QR Code
+                <DownloadIcon className="w-4 h-4" /> {t('common.download')} QR Code
               </button>
               <button
                 onClick={handlePrintLabel}
                 className="flex items-center justify-center gap-2 w-full px-3 py-2 bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-600 text-sm transition-colors"
               >
-                <PrintIcon className="w-4 h-4" /> Print Label
+                <PrintIcon className="w-4 h-4" /> {t('shipment.printLabel')}
               </button>
             </div>
           </div>
 
           {/* Shipment Info */}
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Shipment Info</h3>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">{t('shipment.detail')}</h3>
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">Method</span><span className="text-slate-900 dark:text-white font-medium">{SHIPPING_METHOD_LABELS[shipment.shippingMethod]}</span></div>
-              <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">Type</span><span className="text-slate-900 dark:text-white font-medium">{SHIPMENT_TYPE_LABELS[shipment.shipmentType]}</span></div>
-              <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">Weight</span><span className="text-slate-900 dark:text-white font-medium">{shipment.weight} kg</span></div>
-              {shipment.length && <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">Dimensions</span><span className="text-slate-900 dark:text-white font-medium">{shipment.length}x{shipment.width}x{shipment.height} cm</span></div>}
-              <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">Value</span><span className="text-slate-900 dark:text-white font-medium">${shipment.shipmentValue}</span></div>
-              <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">Product</span><span className="text-slate-900 dark:text-white font-medium text-right max-w-[60%] truncate">{shipment.productDescription}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">{t('shipment.method')}</span><span className="text-slate-900 dark:text-white font-medium">{SHIPPING_METHOD_LABELS[shipment.shippingMethod]}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">{t('shipment.type')}</span><span className="text-slate-900 dark:text-white font-medium">{SHIPMENT_TYPE_LABELS[shipment.shipmentType]}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">{t('shipment.weight')}</span><span className="text-slate-900 dark:text-white font-medium">{shipment.weight} kg</span></div>
+              {shipment.length && <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">{t('shipment.dimensions')}</span><span className="text-slate-900 dark:text-white font-medium">{shipment.length}x{shipment.width}x{shipment.height} cm</span></div>}
+              <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">{t('shipment.value')}</span><span className="text-slate-900 dark:text-white font-medium">${shipment.shipmentValue}</span></div>
+              <div className="flex justify-between"><span className="text-slate-500 dark:text-slate-400">{t('shipment.product')}</span><span className="text-slate-900 dark:text-white font-medium text-right max-w-[60%] truncate">{shipment.productDescription}</span></div>
             </div>
           </div>
 
           {/* Route */}
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Route</h3>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">{t('shipment.route')}</h3>
             <div className="space-y-3 text-sm">
               <div className="flex items-center gap-2">
                 <MapPinIcon className="w-4 h-4 text-red-500" />
@@ -558,37 +584,37 @@ export default function ShipmentDetailPage() {
 
           {/* Quick Actions */}
           <div className="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
-            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">Quick Actions</h3>
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-white mb-4">{t('common.quickActions')}</h3>
             <div className="space-y-2">
               <button
                 onClick={() => copyToClipboard(trackingUrl)}
                 className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
               >
-                <ClipboardIcon className="w-4 h-4" /> Copy Tracking Link
+                <ClipboardIcon className="w-4 h-4" /> {t('shipment.copyLink')}
               </button>
               <button
                 onClick={() => setShareOpen(true)}
                 className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
               >
-                <ShareIcon className="w-4 h-4" /> Share Tracking
+                <ShareIcon className="w-4 h-4" /> {t('shipment.shareTracking') || 'Share Tracking'}
               </button>
               <button
                 onClick={handleDownloadQR}
                 className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
               >
-                <DownloadIcon className="w-4 h-4" /> Download QR Code
+                <DownloadIcon className="w-4 h-4" /> {t('common.download')} QR Code
               </button>
               <button
                 onClick={handlePrintLabel}
                 className="flex items-center gap-2 w-full px-3 py-2 text-sm text-slate-600 dark:text-slate-300 bg-slate-50 dark:bg-slate-700 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-600 transition-colors"
               >
-                <PrintIcon className="w-4 h-4" /> Print Shipping Label
+                <PrintIcon className="w-4 h-4" /> {t('shipment.printLabel')}
               </button>
               <button
                 onClick={() => setCurrentPage('payment')}
                 className="flex items-center gap-2 w-full px-3 py-2.5 text-sm text-white bg-emerald-600 rounded-lg hover:bg-emerald-500 font-medium transition-colors"
               >
-                <CreditCardIcon className="w-4 h-4" /> Pay Now
+                <CreditCardIcon className="w-4 h-4" /> {t('payments.processPayment')}
               </button>
             </div>
           </div>

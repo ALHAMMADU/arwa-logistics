@@ -16,11 +16,6 @@ export async function PUT(
     const session = access.session;
     const { id } = await params;
 
-    // Only admins and warehouse staff can change status
-    if (session.role === 'CUSTOMER') {
-      return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
-    }
-
     const ticket = await db.supportTicket.findUnique({ where: { id } });
     if (!ticket) {
       return NextResponse.json({ success: false, error: 'Ticket not found' }, { status: 404 });
@@ -34,10 +29,20 @@ export async function PUT(
       return NextResponse.json({ success: false, error: 'Invalid status' }, { status: 400 });
     }
 
-    // Resolution is required when resolving
-    if ((status === 'RESOLVED' || status === 'CLOSED') && !resolution?.trim()) {
+    // Customers can only close their own tickets
+    if (session.role === 'CUSTOMER') {
+      if (status !== 'CLOSED') {
+        return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+      }
+      if (ticket.customerId !== session.id) {
+        return NextResponse.json({ success: false, error: 'Forbidden' }, { status: 403 });
+      }
+    }
+
+    // Resolution is required when resolving (but optional for customers closing their own ticket)
+    if (status === 'RESOLVED' && !resolution?.trim()) {
       return NextResponse.json(
-        { success: false, error: 'Resolution is required when resolving or closing a ticket' },
+        { success: false, error: 'Resolution is required when resolving a ticket' },
         { status: 400 }
       );
     }

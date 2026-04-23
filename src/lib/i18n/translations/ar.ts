@@ -2,6 +2,8 @@ import type { Translations } from './en';
 
 const ar: Translations = {
   common: {
+    copied: 'تم النسخ إلى الحافظة!',
+    tryAgainLater: 'يرجى المحاولة لاحقاً',
     save: 'حفظ',
     cancel: 'إلغاء',
     delete: 'حذف',
@@ -72,6 +74,10 @@ const ar: Translations = {
     totalShipmentValue: 'إجمالي قيمة الشحنات',
     statusSummary: 'ملخص حالة الشحنات',
     noShipmentsDisplay: 'لا توجد شحنات للعرض',
+    welcomeBack: 'مرحباً بعودتك',
+    overview: 'إليك نظرة عامة على نشاط الشحن الخاص بك.',
+    failedLoadShipments: 'فشل تحميل الشحنات',
+    tryAgainLater: 'يرجى المحاولة لاحقاً',
   },
   nav: {
     dashboard: 'لوحة التحكم',
@@ -98,6 +104,10 @@ const ar: Translations = {
     adminSettings: 'إعدادات المسؤول',
     shipmentMap: 'خريطة الشحنات',
     support: 'الدعم',
+    more: 'المزيد',
+    morePages: 'المزيد من الصفحات',
+    morePagesDesc: 'عناصر تنقل إضافية',
+    toggleSidebar: 'تبديل الشريط الجانبي',
   },
   aiChat: {
     title: 'مساعد أروا الذكي',
@@ -613,6 +623,18 @@ const ar: Translations = {
     assignTo: 'تعيين إلى',
     unassigned: 'غير معين',
     customerInfo: 'معلومات العميل',
+    open: 'مفتوحة',
+    waiting: 'بانتظار',
+    resolved: 'تم الحل',
+    closed: 'مغلقة',
+    low: 'منخفضة',
+    medium: 'متوسطة',
+    high: 'عالية',
+    urgent: 'عاجلة',
+    createdSuccess: 'تم إنشاء التذكرة بنجاح',
+    closeTicket: 'إغلاق التذكرة',
+    ticketClosed: 'تم إغلاق التذكرة بنجاح',
+    closedByCustomer: 'أغلقت من قبل العميل',
   },
   quotations: {
     title: 'عروض الأسعار',

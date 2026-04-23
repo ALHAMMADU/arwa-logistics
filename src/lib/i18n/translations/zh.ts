@@ -2,6 +2,8 @@ import type { Translations } from './en';
 
 const zh: Translations = {
   common: {
+    copied: '已复制到剪贴板！',
+    tryAgainLater: '请稍后重试',
     save: '保存',
     cancel: '取消',
     delete: '删除',
@@ -72,6 +74,10 @@ const zh: Translations = {
     totalShipmentValue: '总货值',
     statusSummary: '货物状态汇总',
     noShipmentsDisplay: '暂无货物显示',
+    welcomeBack: '欢迎回来',
+    overview: '以下是您的运输活动概览。',
+    failedLoadShipments: '加载货物失败',
+    tryAgainLater: '请稍后重试',
   },
   nav: {
     dashboard: '仪表板',
@@ -98,6 +104,10 @@ const zh: Translations = {
     adminSettings: '管理员设置',
     shipmentMap: '货物地图',
     support: '支持',
+    more: '更多',
+    morePages: '更多页面',
+    morePagesDesc: '其他导航项',
+    toggleSidebar: '切换侧边栏',
   },
   aiChat: {
     title: 'ARWA AI 助手',
@@ -613,6 +623,18 @@ const zh: Translations = {
     assignTo: '分配给',
     unassigned: '未分配',
     customerInfo: '客户信息',
+    open: '待处理',
+    waiting: '等待中',
+    resolved: '已解决',
+    closed: '已关闭',
+    low: '低',
+    medium: '中',
+    high: '高',
+    urgent: '紧急',
+    createdSuccess: '工单创建成功',
+    closeTicket: '关闭工单',
+    ticketClosed: '工单已成功关闭',
+    closedByCustomer: '由客户关闭',
   },
   quotations: {
     title: '报价单',

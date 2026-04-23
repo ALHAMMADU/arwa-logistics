@@ -1,5 +1,7 @@
 const en = {
   common: {
+    copied: 'Copied to clipboard!',
+    tryAgainLater: 'Please try again later',
     save: 'Save',
     cancel: 'Cancel',
     delete: 'Delete',
@@ -70,6 +72,10 @@ const en = {
     totalShipmentValue: 'Total shipment value',
     statusSummary: 'Shipment Status Summary',
     noShipmentsDisplay: 'No shipments to display',
+    welcomeBack: 'Welcome back',
+    overview: "Here's an overview of your shipping activity.",
+    failedLoadShipments: 'Failed to load shipments',
+    tryAgainLater: 'Please try again later',
   },
   nav: {
     dashboard: 'Dashboard',
@@ -96,6 +102,10 @@ const en = {
     adminSettings: 'Admin Settings',
     shipmentMap: 'Shipment Map',
     support: 'Support',
+    more: 'More',
+    morePages: 'More Pages',
+    morePagesDesc: 'Additional navigation items',
+    toggleSidebar: 'Toggle sidebar',
   },
   aiChat: {
     title: 'ARWA AI Assistant',
@@ -611,6 +621,18 @@ const en = {
     assignTo: 'Assign To',
     unassigned: 'Unassigned',
     customerInfo: 'Customer Info',
+    open: 'Open',
+    waiting: 'Waiting',
+    resolved: 'Resolved',
+    closed: 'Closed',
+    low: 'Low',
+    medium: 'Medium',
+    high: 'High',
+    urgent: 'Urgent',
+    createdSuccess: 'Ticket created successfully',
+    closeTicket: 'Close Ticket',
+    ticketClosed: 'Ticket closed successfully',
+    closedByCustomer: 'Closed by customer',
   },
   quotations: {
     title: 'Quotations',
