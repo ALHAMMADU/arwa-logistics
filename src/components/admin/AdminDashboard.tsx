@@ -128,11 +128,12 @@ function RevenueTooltip({ active, payload, label }: any) {
 // ─── Custom Tooltip for Shipments ────────────────────────
 
 function ShipmentsTooltip({ active, payload, label }: any) {
+  const { t } = useI18n();
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-xs shadow-xl">
       <p className="font-medium text-slate-700 dark:text-slate-300 mb-1">{label}</p>
-      <p className="text-emerald-700 dark:text-emerald-400 font-semibold">{payload[0].value} shipments</p>
+      <p className="text-emerald-700 dark:text-emerald-400 font-semibold">{payload[0].value} {t('admin.shipmentsUnit')}</p>
     </div>
   );
 }
@@ -140,11 +141,12 @@ function ShipmentsTooltip({ active, payload, label }: any) {
 // ─── Custom Tooltip for Countries ─────────────────────────
 
 function CountryTooltip({ active, payload }: any) {
+  const { t } = useI18n();
   if (!active || !payload?.length) return null;
   return (
     <div className="rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-3 py-2 text-xs shadow-xl">
       <p className="font-medium text-slate-700 dark:text-slate-300 mb-1">{payload[0].payload.country}</p>
-      <p className="text-emerald-700 dark:text-emerald-400 font-semibold">{payload[0].value} shipments</p>
+      <p className="text-emerald-700 dark:text-emerald-400 font-semibold">{payload[0].value} {t('admin.shipmentsUnit')}</p>
     </div>
   );
 }
@@ -220,7 +222,7 @@ export default function AdminDashboard() {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-1">{t('admin.dashboard')}</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm">Overview of ARWA LOGISTICS operations</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm">{t('admin.operationsOverview')}</p>
           </div>
         </div>
         <SkeletonStats count={6} />
@@ -336,7 +338,7 @@ export default function AdminDashboard() {
       change: stats?.shipmentChange || 0,
     },
     {
-      label: 'Active Shipments',
+      label: t('admin.activeShipmentsLabel'),
       value: stats?.activeShipments || 0,
       icon: <TruckIcon className="w-5 h-5 text-white" />,
       sparkData: [],
@@ -363,7 +365,7 @@ export default function AdminDashboard() {
       change: 0,
     },
     {
-      label: 'In Transit',
+      label: t('admin.inTransitLabel'),
       value: stats?.inTransit || 0,
       icon: <PlaneIcon className="w-5 h-5 text-white" />,
       sparkData: [],
@@ -372,7 +374,7 @@ export default function AdminDashboard() {
       change: 0,
     },
     {
-      label: 'Delivered This Month',
+      label: t('admin.deliveredThisMonthLabel'),
       value: stats?.deliveredThisMonth || 0,
       icon: <ClipboardIcon className="w-5 h-5 text-white" />,
       sparkData: [],
@@ -393,7 +395,7 @@ export default function AdminDashboard() {
       >
         <div>
           <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-1">{t('admin.dashboard')}</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm">Overview of ARWA LOGISTICS operations</p>
+          <p className="text-slate-500 dark:text-slate-400 text-sm">{t('admin.operationsOverview')}</p>
         </div>
         <div className="flex items-center gap-4">
           <AutoRefresh interval={30} onRefresh={handleRefresh} lastUpdated={lastUpdated} />
@@ -478,9 +480,9 @@ export default function AdminDashboard() {
         >
           <div className="flex items-center gap-2 mb-4">
             <TrendingUpIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Shipment Volume Trend</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t('admin.shipmentVolumeTrend')}</h3>
           </div>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Monthly shipment volume for the last 12 months</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('admin.monthlyShipmentVolume')}</p>
           <ChartContainer config={shipmentsChartConfig} className="h-[280px] w-full">
             <AreaChart data={shipmentsTimeData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
               <defs>
@@ -527,9 +529,9 @@ export default function AdminDashboard() {
         >
           <div className="flex items-center gap-2 mb-4">
             <DollarIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Revenue Trend</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t('admin.revenueTrend')}</h3>
           </div>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Monthly revenue for the last 12 months</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('admin.monthlyRevenue')}</p>
           <ChartContainer config={revenueChartConfig} className="h-[280px] w-full">
             <BarChart data={revenueTimeData} margin={{ top: 5, right: 10, left: -10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" vertical={false} className="dark:opacity-20" />
@@ -570,9 +572,9 @@ export default function AdminDashboard() {
         >
           <div className="flex items-center gap-2 mb-4">
             <BarChartIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Shipments by Status</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t('admin.shipmentsByStatus')}</h3>
           </div>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Shipment breakdown by current status</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('admin.shipmentBreakdownStatus')}</p>
           <div className="flex flex-col lg:flex-row items-center gap-4">
             <ChartContainer config={dynamicStatusChartConfig} className="h-[240px] w-full max-w-[240px]">
               <PieChart>
@@ -618,9 +620,9 @@ export default function AdminDashboard() {
         >
           <div className="flex items-center gap-2 mb-4">
             <ShipIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Shipping Methods Distribution</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t('admin.methodsDistribution')}</h3>
           </div>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Shipment breakdown by shipping method</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('admin.shipmentBreakdownMethod')}</p>
           <div className="flex flex-col lg:flex-row items-center gap-4">
             <ChartContainer config={dynamicMethodChartConfig} className="h-[240px] w-full max-w-[240px]">
               <PieChart>
@@ -664,7 +666,7 @@ export default function AdminDashboard() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="text-sm font-medium text-slate-700 dark:text-slate-300">{m.name}</div>
-                        <div className="text-xs text-slate-400 dark:text-slate-500">{m.value} shipments</div>
+                        <div className="text-xs text-slate-400 dark:text-slate-500">{m.value} {t('admin.shipmentsUnit')}</div>
                       </div>
                       <div className="text-lg font-bold text-slate-800 dark:text-slate-200">
                         {percentage}%
@@ -698,9 +700,9 @@ export default function AdminDashboard() {
         >
           <div className="flex items-center gap-2 mb-4">
             <GlobeIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Top Destination Countries</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t('admin.topCountries')}</h3>
           </div>
-          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Top 10 destination countries by shipment volume</p>
+          <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('admin.topCountriesVolume')}</p>
           {countryData.length > 0 ? (
             <ChartContainer config={dynamicCountriesChartConfig} className="h-[320px] w-full">
               <BarChart data={countryData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -730,7 +732,7 @@ export default function AdminDashboard() {
             </ChartContainer>
           ) : (
             <div className="flex items-center justify-center h-[200px] text-slate-400 dark:text-slate-500 text-sm">
-              No country data available
+              {t('admin.noCountryData')}
             </div>
           )}
         </motion.div>
@@ -745,11 +747,11 @@ export default function AdminDashboard() {
         >
           <div className="flex items-center gap-2 mb-2">
             <DollarIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Revenue This Week</h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t('admin.revenueThisWeek')}</h3>
           </div>
           <div className="mb-4">
             <span className="text-2xl font-bold text-slate-900 dark:text-slate-100">${weekRevenueTotal.toLocaleString()}</span>
-            <span className="text-xs text-slate-400 dark:text-slate-500 ml-2">this week</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500 ml-2">{t('admin.thisWeek')}</span>
           </div>
           <ChartContainer config={weekRevenueConfig} className="h-[180px] w-full">
             <BarChart data={revenueWeekData} margin={{ top: 5, right: 5, left: -15, bottom: 0 }}>
@@ -790,9 +792,9 @@ export default function AdminDashboard() {
           <div className="flex items-center justify-between mb-1">
             <div className="flex items-center gap-2">
               <PackageIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
-              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">Recent Shipments</h3>
+              <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t('admin.recentShipments')}</h3>
             </div>
-            <span className="text-xs text-slate-400 dark:text-slate-500">Latest 10 shipments</span>
+            <span className="text-xs text-slate-400 dark:text-slate-500">{t('admin.latest10Shipments')}</span>
           </div>
         </div>
         <div className="overflow-x-auto">
@@ -865,7 +867,7 @@ export default function AdminDashboard() {
           </table>
         </div>
         {(!stats?.recentShipments || stats.recentShipments.length === 0) && (
-          <div className="text-center py-8 text-slate-400 dark:text-slate-500 text-sm">No shipments found</div>
+          <div className="text-center py-8 text-slate-400 dark:text-slate-500 text-sm">{t('admin.noShipmentsFound')}</div>
         )}
       </motion.div>
 
@@ -881,7 +883,7 @@ export default function AdminDashboard() {
           <ClockIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
           <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t('admin.todayActivity')}</h3>
         </div>
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">Latest 10 audit log entries</p>
+        <p className="text-xs text-slate-400 dark:text-slate-500 mb-4">{t('admin.latest10AuditLogs')}</p>
 
         {auditLoading ? (
           <div className="space-y-4">

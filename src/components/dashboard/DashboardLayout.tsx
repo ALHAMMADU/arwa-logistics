@@ -153,7 +153,7 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto sidebar-scroll">
+        <nav role="navigation" aria-label="Main navigation" className="flex-1 p-2 space-y-0.5 overflow-y-auto sidebar-scroll">
           {navItems.map(item => {
             const isActive = currentPage === item.page;
             return (
@@ -178,7 +178,7 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
                 )}
                 {/* Tooltip for collapsed sidebar */}
                 {!sidebarOpen && (
-                  <span className="absolute left-full ml-3 px-2 py-1 bg-slate-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg">
+                  <span className={`absolute ${isRTL ? 'right-full mr-3' : 'left-full ml-3'} px-2 py-1 bg-slate-800 text-white text-xs rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity whitespace-nowrap z-50 shadow-lg`}>
                     {t(item.label)}
                   </span>
                 )}
@@ -243,7 +243,7 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
             <XIcon className="w-5 h-5" />
           </button>
         </div>
-        <nav className="flex-1 p-2 space-y-0.5 overflow-y-auto sidebar-scroll">
+        <nav role="navigation" aria-label="Mobile navigation" className="flex-1 p-2 space-y-0.5 overflow-y-auto sidebar-scroll">
           {navItems.map(item => {
             const isActive = currentPage === item.page;
             return (
@@ -381,7 +381,7 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
 
         {/* Mobile Bottom Navigation */}
         <div className="fixed bottom-0 left-0 right-0 z-30 md:hidden bg-white/90 dark:bg-slate-800/90 backdrop-blur-md border-t border-slate-200 dark:border-slate-700 safe-area-bottom">
-          <div className="flex items-center justify-around px-2 py-1">
+          <div dir={dir} className="flex items-center justify-around px-2 py-1">
             {visibleNavItems.map(item => {
               const isActive = currentPage === item.page;
               return (

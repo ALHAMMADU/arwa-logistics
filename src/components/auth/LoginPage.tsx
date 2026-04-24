@@ -10,7 +10,7 @@ import { useI18n } from '@/lib/i18n';
 
 export default function LoginPage() {
   const { setCurrentPage, setUser } = useAppStore();
-  const { t } = useI18n();
+  const { isRTL, t } = useI18n();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
@@ -111,14 +111,14 @@ export default function LoginPage() {
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={e => setPassword(e.target.value)}
-                className="w-full px-4 py-3 pr-12 bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-200 hover:border-white/20"
+                className={`w-full px-4 py-3 ${isRTL ? 'pl-12' : 'pr-12'} bg-white/5 border border-white/10 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500/50 transition-all duration-200 hover:border-white/20`}
                 placeholder={t('auth.enterPassword')}
                 required
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors p-1 rounded-lg hover:bg-white/10"
+                className={`absolute ${isRTL ? 'left-3' : 'right-3'} top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-300 transition-colors p-1 rounded-lg hover:bg-white/10`}
               >
                 {showPassword ? <EyeOffIcon className="w-4 h-4" /> : <EyeIcon className="w-4 h-4" />}
               </button>
@@ -179,7 +179,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => { setEmail('admin@arwalogistics.com'); setPassword('admin123'); }}
-                className="w-full text-left px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-between group"
+                className={`w-full ${isRTL ? 'text-right' : 'text-left'} px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-between group`}
               >
                 <span>Admin: admin@arwalogistics.com</span>
                 <span className="text-slate-600 group-hover:text-slate-400 transition-colors">{t('auth.clickToFill')}</span>
@@ -187,7 +187,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => { setEmail('customer@arwalogistics.com'); setPassword('customer123'); }}
-                className="w-full text-left px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-between group"
+                className={`w-full ${isRTL ? 'text-right' : 'text-left'} px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-between group`}
               >
                 <span>Customer: customer@arwalogistics.com</span>
                 <span className="text-slate-600 group-hover:text-slate-400 transition-colors">{t('auth.clickToFill')}</span>
@@ -195,7 +195,7 @@ export default function LoginPage() {
               <button
                 type="button"
                 onClick={() => { setEmail('warehouse@arwalogistics.com'); setPassword('warehouse123'); }}
-                className="w-full text-left px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-between group"
+                className={`w-full ${isRTL ? 'text-right' : 'text-left'} px-3 py-2 text-xs text-slate-400 bg-white/5 rounded-lg hover:bg-white/10 transition-all duration-200 flex items-center justify-between group`}
               >
                 <span>Warehouse: warehouse@arwalogistics.com</span>
                 <span className="text-slate-600 group-hover:text-slate-400 transition-colors">{t('auth.clickToFill')}</span>

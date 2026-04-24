@@ -1036,3 +1036,166 @@ table tbody tr {
 .dark .empty-state-icon {
   opacity: 0.2;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   ENHANCED UI/UX IMPROVEMENTS
+   ═══════════════════════════════════════════════════════════ */
+
+/* Smooth gradient transitions for welcome banners */
+.gradient-animate {
+  background-size: 200% 200%;
+  animation: gradient-shift 8s ease infinite;
+}
+
+@keyframes gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Subtle glassmorphism effect for cards */
+.glass-card {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+.dark .glass-card {
+  background: rgba(30, 41, 59, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+/* Improved stat card glow on hover */
+.stat-card-glow {
+  transition: box-shadow 300ms ease, transform 200ms ease;
+}
+
+.stat-card-glow:hover {
+  box-shadow: 0 4px 20px rgba(16, 185, 129, 0.12);
+}
+
+.dark .stat-card-glow:hover {
+  box-shadow: 0 4px 20px rgba(52, 211, 153, 0.08);
+}
+
+/* Smooth chart container entrance */
+.chart-enter {
+  animation: chartReveal 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+@keyframes chartReveal {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Improved table row hover with left accent */
+.table-row-accent {
+  position: relative;
+  transition: background-color 150ms ease;
+}
+
+.table-row-accent:hover {
+  background-color: rgba(16, 185, 129, 0.04);
+}
+
+.table-row-accent:hover::before {
+  content: '';
+  position: absolute;
+  inset-inline-start: 0;
+  top: 4px;
+  bottom: 4px;
+  width: 3px;
+  background: #10b981;
+  border-radius: 0 3px 3px 0;
+}
+
+[dir="rtl"] .table-row-accent:hover::before {
+  border-radius: 3px 0 0 3px;
+}
+
+/* Form field focus glow enhancement */
+.form-field-focus {
+  transition: border-color 200ms ease, box-shadow 200ms ease;
+}
+
+.form-field-focus:focus {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+}
+
+/* Smooth badge transition */
+.badge-transition {
+  transition: background-color 200ms ease, color 200ms ease, transform 150ms ease;
+}
+
+.badge-transition:hover {
+  transform: scale(1.05);
+}
+
+/* Step indicator progress line animation */
+.step-progress-line {
+  position: relative;
+  overflow: hidden;
+}
+
+.step-progress-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  inset-inline-start: 0;
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(90deg, #10b981, #059669);
+  transform-origin: left;
+  animation: progress-fill 0.5s ease-out forwards;
+}
+
+[dir="rtl"] .step-progress-line::after {
+  transform-origin: right;
+}
+
+@keyframes progress-fill {
+  from { transform: scaleX(0); }
+  to { transform: scaleX(1); }
+}
+
+/* Improved select dropdown appearance */
+select {
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-right: 2.5rem;
+}
+
+[dir="rtl"] select {
+  background-position: left 0.5rem center;
+  padding-right: 0.75rem;
+  padding-left: 2.5rem;
+}
+
+/* Smooth page content area transition */
+.page-content-transition {
+  transition: opacity 200ms ease, transform 200ms ease;
+}
+
+/* Hover tooltip for truncated text */
+.truncate-hover {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.truncate-hover:hover {
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
+}

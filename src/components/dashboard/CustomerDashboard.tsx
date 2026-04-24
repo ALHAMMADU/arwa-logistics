@@ -149,7 +149,7 @@ export default function CustomerDashboard() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-500 p-6 sm:p-8 text-white relative overflow-hidden"
+        className="rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 border border-emerald-400/20 p-6 sm:p-8 text-white relative overflow-hidden"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.15),transparent)] pointer-events-none" />
         <div className="relative z-10">
@@ -227,6 +227,18 @@ export default function CustomerDashboard() {
             <div>
               <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 ${stats.totalSpent.toLocaleString()}
+                {(() => {
+                  const first3 = spendingData.slice(0, 3).reduce((a: number, b: number) => a + b, 0);
+                  const last3 = spendingData.slice(3).reduce((a: number, b: number) => a + b, 0);
+                  if (first3 === 0 && last3 === 0) return null;
+                  const trending = last3 > first3;
+                  return (
+                    <span className={`ml-2 inline-flex items-center text-xs font-medium ${trending ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'}`}>
+                      <TrendingUpIcon className={`w-3.5 h-3.5 mr-0.5 ${trending ? '' : 'rotate-180'}`} />
+                      {trending ? (t('dashboard.trendingUp') || 'Trending up') : (t('dashboard.trendingDown') || 'Trending down')}
+                    </span>
+                  );
+                })()}
               </div>
               <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{t('dashboard.totalShipmentValue') || 'Total shipment value'}</div>
             </div>
@@ -260,11 +272,12 @@ export default function CustomerDashboard() {
         transition={{ delay: 0.25, duration: 0.4 }}
       >
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t('common.recent')} Shipments</h3>
+          <h3 className="text-base font-semibold text-slate-900 dark:text-slate-100">{t('common.recent')} {t('nav.shipments')}</h3>
           <div className="flex items-center gap-2">
-            <AutoRefresh interval={30} onRefresh={refresh} lastUpdated={lastUpdated} />
+            <AutoRefresh interval={30} onRefresh={refresh} lastUpdated={lastUpdated} aria-label={t('common.refresh')} />
             <button
               onClick={() => setCurrentPage('create-shipment')}
+              aria-label={t('shipment.create')}
               className="flex items-center gap-1.5 px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-500 transition-colors"
             >
               <PlusIcon className="w-4 h-4" /> {t('shipment.create')}
@@ -307,7 +320,7 @@ export default function CustomerDashboard() {
                   onKeyDown={(e) => { if (e.key === 'Enter') { setSelectedShipmentId(s.id); setCurrentPage('shipment-detail'); } }}
                   role="button"
                   tabIndex={0}
-                  className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 cursor-pointer transition-all group"
+                  className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 cursor-pointer transition-all group hover:border-emerald-200 dark:hover:border-emerald-700"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
