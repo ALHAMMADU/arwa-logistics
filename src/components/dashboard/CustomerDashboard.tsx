@@ -149,9 +149,12 @@ export default function CustomerDashboard() {
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="rounded-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 border border-emerald-400/20 p-6 sm:p-8 text-white relative overflow-hidden"
+        className="rounded-2xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-500 border border-emerald-400/20 p-6 sm:p-8 text-white relative overflow-hidden gradient-flow"
       >
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_80%_20%,rgba(255,255,255,0.15),transparent)] pointer-events-none" />
+        {/* Decorative floating circles */}
+        <div className="absolute -top-6 -right-6 w-24 h-24 bg-white/5 rounded-full ambient-glow" />
+        <div className="absolute -bottom-4 left-1/4 w-16 h-16 bg-white/5 rounded-full ambient-glow" style={{ animationDelay: '2s' }} />
         <div className="relative z-10">
           <h1 className="text-xl sm:text-2xl font-bold mb-1">{t('dashboard.welcomeBack') || 'Welcome back'}, {user?.name || 'User'}!</h1>
           <p className="text-emerald-100 text-sm">{t('dashboard.overview') || "Here's an overview of your shipping activity."}</p>
@@ -198,7 +201,7 @@ export default function CustomerDashboard() {
               whileHover={{ scale: 1.03, y: -1 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setCurrentPage(action.page)}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl border font-medium text-sm transition-all ${action.color}`}
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl border font-medium text-sm transition-all card-shine ${action.color}`}
             >
               {action.icon}
               <span>{action.label}</span>
@@ -214,7 +217,7 @@ export default function CustomerDashboard() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.15, duration: 0.4 }}
-          className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6"
+          className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 stat-card-glow card-shine"
         >
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
@@ -251,7 +254,7 @@ export default function CustomerDashboard() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2, duration: 0.4 }}
-          className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6"
+          className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 stat-card-glow card-shine"
         >
           <div className="flex items-center gap-2 mb-4">
             <TrendingUpIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -288,8 +291,10 @@ export default function CustomerDashboard() {
         {loading ? (
           <SkeletonTable rows={4} columns={5} />
         ) : shipmentData === null && !loading ? (
-          <div className="text-center py-16 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-            <AlertIcon className="w-16 h-16 text-red-300 dark:text-red-500 mx-auto mb-4" />
+          <div className="text-center py-16 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+            <div className="empty-state-float inline-block">
+              <AlertIcon className="w-16 h-16 text-red-300 dark:text-red-500 mx-auto mb-4" />
+            </div>
             <h3 className="text-lg font-medium text-slate-600 dark:text-slate-400">{t('dashboard.failedLoadShipments') || 'Failed to load shipments'}</h3>
             <p className="text-slate-400 dark:text-slate-500 mt-2">{t('common.tryAgainLater') || 'Something went wrong. Please try again.'}</p>
             <button onClick={() => refresh()} className="mt-4 px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition-colors">
@@ -297,8 +302,10 @@ export default function CustomerDashboard() {
             </button>
           </div>
         ) : shipments.length === 0 ? (
-          <div className="text-center py-16 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
-            <PackageIcon className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+          <div className="text-center py-16 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+            <div className="empty-state-float inline-block">
+              <PackageIcon className="w-16 h-16 text-slate-300 dark:text-slate-600 mx-auto mb-4" />
+            </div>
             <h3 className="text-lg font-medium text-slate-600 dark:text-slate-400">{t('shipment.noShipments')}</h3>
             <p className="text-slate-400 dark:text-slate-500 mt-2">{t('shipment.createFirst')}</p>
             <button onClick={() => setCurrentPage('create-shipment')} className="mt-4 px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-500 transition-colors">
@@ -320,7 +327,7 @@ export default function CustomerDashboard() {
                   onKeyDown={(e) => { if (e.key === 'Enter') { setSelectedShipmentId(s.id); setCurrentPage('shipment-detail'); } }}
                   role="button"
                   tabIndex={0}
-                  className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 cursor-pointer transition-all group hover:border-emerald-200 dark:hover:border-emerald-700"
+                  className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 cursor-pointer transition-all group hover:border-emerald-200 dark:hover:border-emerald-700 card-shine"
                 >
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -441,7 +448,7 @@ export default function CustomerDashboard() {
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-700">
                     {shipments.map((s: any) => (
-                      <tr key={s.id} className="hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors">
+                      <tr key={s.id} className="table-row-clickable">
                         <td className="px-4 py-3">
                           <div className="font-medium text-slate-900 dark:text-slate-100 text-sm">{s.shipmentId}</div>
                           <div className="text-xs text-slate-400">{s.trackingNumber}</div>

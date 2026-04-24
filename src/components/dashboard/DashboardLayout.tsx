@@ -160,7 +160,7 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
               <button
                 key={item.page}
                 onClick={() => setCurrentPage(item.page)}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 relative group ${
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-all duration-200 relative group sidebar-nav-item ${
                   isActive
                     ? 'bg-emerald-600/90 text-white shadow-md shadow-emerald-600/20'
                     : 'text-slate-400 hover:bg-white/[0.06] hover:text-white'
@@ -388,15 +388,12 @@ export default function DashboardLayout({ children, navItems }: DashboardLayoutP
                 <button
                   key={item.page}
                   onClick={() => setCurrentPage(item.page)}
-                  className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 min-w-0 relative ${
+                  className={`flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all duration-200 min-w-0 relative touch-feedback ${
                     isActive
-                      ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20'
+                      ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 bottom-nav-active-indicator'
                       : 'text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300'
                   }`}
                 >
-                  {isActive && (
-                    <span className="absolute -top-1 left-1/2 -translate-x-1/2 w-6 h-1 bg-emerald-500 rounded-full" />
-                  )}
                   {item.icon}
                   <span className="text-[10px] font-medium truncate">{t(item.label)}</span>
                 </button>

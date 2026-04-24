@@ -446,7 +446,7 @@ export default function AdminDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.05 * i, duration: 0.4 }}
             whileHover={{ y: -2, boxShadow: '0 8px 25px rgba(0,0,0,0.08)' }}
-            className="relative overflow-hidden rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 transition-all group"
+            className="relative overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-4 transition-all group card-shine stat-card-glow"
           >
             {/* Gradient accent top bar */}
             <div className={`absolute top-0 left-0 right-0 h-1 bg-gradient-to-r ${card.gradient}`} />
@@ -476,7 +476,7 @@ export default function AdminDashboard() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6"
+          className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 stat-card-glow"
         >
           <div className="flex items-center gap-2 mb-4">
             <TrendingUpIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -525,7 +525,7 @@ export default function AdminDashboard() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6"
+          className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 stat-card-glow"
         >
           <div className="flex items-center gap-2 mb-4">
             <DollarIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -568,7 +568,7 @@ export default function AdminDashboard() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6"
+          className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 stat-card-glow"
         >
           <div className="flex items-center gap-2 mb-4">
             <BarChartIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -616,7 +616,7 @@ export default function AdminDashboard() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ delay: 0.1, duration: 0.5 }}
-          className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6"
+          className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 stat-card-glow"
         >
           <div className="flex items-center gap-2 mb-4">
             <ShipIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
@@ -786,7 +786,7 @@ export default function AdminDashboard() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden"
+        className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 overflow-hidden"
       >
         <div className="p-6 pb-4">
           <div className="flex items-center justify-between mb-1">
@@ -814,7 +814,7 @@ export default function AdminDashboard() {
               {(stats?.recentShipments || []).map((s: any) => (
                 <tr
                   key={s.id}
-                  className="hover:bg-slate-50/50 dark:hover:bg-slate-700/30 transition-colors cursor-pointer"
+                  className="table-row-clickable"
                   onClick={() => {
                     setSelectedShipmentId(s.id);
                     setCurrentPage('shipment-detail');
@@ -877,7 +877,7 @@ export default function AdminDashboard() {
         whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5 }}
-        className="rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6"
+        className="rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-6 stat-card-glow"
       >
         <div className="flex items-center gap-2 mb-4">
           <ClockIcon className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />

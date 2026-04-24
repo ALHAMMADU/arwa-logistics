@@ -200,8 +200,27 @@ export default function LandingPage() {
       </Sheet>
 
       {/* Hero */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-32">
-        <div className="text-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20 md:py-32 relative">
+        {/* Animated mesh gradient background */}
+        <div className="absolute inset-0 hero-mesh-gradient pointer-events-none" />
+        {/* Floating particles */}
+        <div className="hero-particles">
+          {[...Array(12)].map((_, i) => (
+            <div
+              key={i}
+              className="hero-particle"
+              style={{
+                left: `${8 + (i * 7.5) % 85}%`,
+                top: `${15 + (i * 13) % 70}%`,
+                animationDelay: `${i * 0.8}s`,
+                animationDuration: `${5 + (i % 4)}s`,
+                width: `${2 + (i % 3)}px`,
+                height: `${2 + (i % 3)}px`,
+              }}
+            />
+          ))}
+        </div>
+        <div className="text-center relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -267,7 +286,7 @@ export default function LandingPage() {
           initial={{ opacity: 0 }}
           whileInView={{ opacity: 1 }}
           viewport={{ once: true }}
-          className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-12"
+          className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-12 decorative-line"
         >
           {t('landing.ourShippingServices')}
         </motion.h2>
@@ -296,7 +315,7 @@ export default function LandingPage() {
 
       {/* Shipment Types */}
       <AnimatedSection className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-12">{t('landing.shipmentTypes')}</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-12 decorative-line">{t('landing.shipmentTypes')}</h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
           {[
             { title: t('landing.parcel'), desc: t('landing.parcelDesc'), price: t('landing.parcelPrice') },
@@ -365,7 +384,7 @@ export default function LandingPage() {
 
       {/* How It Works */}
       <AnimatedSection className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-12">{t('landing.howItWorks')}</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-12 decorative-line">{t('landing.howItWorks')}</h2>
         <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-6 sm:gap-8">
           {[
             { step: 1, title: t('landing.step1Title'), desc: t('landing.step1Desc'), icon: <GlobeIcon className="w-7 h-7" /> },
@@ -402,7 +421,7 @@ export default function LandingPage() {
 
       {/* Testimonials */}
       <AnimatedSection className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-12">{t('landing.testimonials')}</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-12 decorative-line">{t('landing.testimonials')}</h2>
         <div className="grid sm:grid-cols-2 gap-4 sm:gap-6">
           {[
             {
@@ -497,7 +516,7 @@ export default function LandingPage() {
 
       {/* FAQ */}
       <AnimatedSection className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-16 sm:py-20">
-        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-12">{t('landing.faq')}</h2>
+        <h2 className="text-2xl sm:text-3xl font-bold text-white text-center mb-8 sm:mb-12 decorative-line">{t('landing.faq')}</h2>
         <div className="space-y-3">
           <FAQItem
             index={0}

@@ -92,13 +92,28 @@ const warehouseNavItems = [
   { page: 'profile' as AppPage, label: 'nav.profile', icon: <UserIcon className="w-5 h-5" /> },
 ];
 
-// Page loading fallback
+// Page loading fallback — branded animated loader
 function PageLoader() {
   return (
     <div className="flex items-center justify-center min-h-[40vh]">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-3 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-        <span className="text-slate-400 text-sm">Loading...</span>
+      <div className="flex flex-col items-center gap-4">
+        {/* Pulsing ring behind the icon */}
+        <div className="relative flex items-center justify-center">
+          <div className="absolute w-14 h-14 rounded-full border-2 border-emerald-400/30 brand-loader-ring" />
+          <div className="w-10 h-10 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 brand-loader-icon">
+            <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+            </svg>
+          </div>
+        </div>
+        <div className="flex flex-col items-center gap-1.5">
+          <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">Loading...</span>
+          <div className="flex items-center gap-1">
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+            <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -213,15 +228,24 @@ function SessionLoader({ children }: { children: React.ReactNode }) {
   if (restoring) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-slate-50 dark:bg-[#0f172a]">
-        <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 bg-emerald-500 rounded-xl flex items-center justify-center">
-            <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
-            </svg>
+        <div className="flex flex-col items-center gap-5">
+          {/* Branded logo with pulsing ring */}
+          <div className="relative flex items-center justify-center">
+            <div className="absolute w-20 h-20 rounded-full border-2 border-emerald-400/20 brand-loader-ring" />
+            <div className="absolute w-16 h-16 rounded-full border-2 border-emerald-400/10 brand-loader-ring" style={{ animationDelay: '0.5s' }} />
+            <div className="w-14 h-14 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-2xl flex items-center justify-center shadow-xl shadow-emerald-500/25 brand-loader-icon">
+              <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+              </svg>
+            </div>
           </div>
           <div className="flex flex-col items-center gap-2">
-            <div className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full animate-spin" />
-            <span className="text-slate-400 text-sm">Restoring session...</span>
+            <span className="text-slate-600 dark:text-slate-300 text-sm font-medium">Restoring session...</span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+            </div>
           </div>
         </div>
       </div>

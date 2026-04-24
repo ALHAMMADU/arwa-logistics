@@ -20,9 +20,9 @@ export function EmptyState({ icon, title, description, action, className = '' }:
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`flex flex-col items-center justify-center py-16 px-6 text-center rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 ${className}`}
+      className={`flex flex-col items-center justify-center py-16 px-6 text-center rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 ${className}`}
     >
-      <div className="empty-state-icon mb-4">
+      <div className="empty-state-icon mb-4 empty-state-float">
         {icon}
       </div>
       <h3 className="text-lg font-semibold text-slate-600 dark:text-slate-300 mb-2">{title}</h3>
@@ -30,12 +30,14 @@ export function EmptyState({ icon, title, description, action, className = '' }:
         <p className="text-sm text-slate-400 dark:text-slate-500 max-w-sm">{description}</p>
       )}
       {action && (
-        <button
+        <motion.button
+          whileHover={{ scale: 1.04 }}
+          whileTap={{ scale: 0.97 }}
           onClick={action.onClick}
-          className="mt-6 px-6 py-2.5 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-500 transition-colors shadow-sm hover:shadow-md"
+          className="mt-6 px-6 py-2.5 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-500 transition-colors shadow-sm hover:shadow-md shadow-emerald-500/20"
         >
           {action.label}
-        </button>
+        </motion.button>
       )}
     </motion.div>
   );

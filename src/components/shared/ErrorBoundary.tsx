@@ -58,10 +58,10 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
         this.state.error?.message || 'An unexpected error occurred';
 
       return (
-        <div className="min-h-[400px] flex items-center justify-center p-6">
+        <div className="min-h-[400px] flex items-center justify-center p-6 bg-slate-50 dark:bg-[#0f172a]">
           <div className="max-w-md w-full text-center">
-            {/* Error Icon */}
-            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20">
+            {/* Error Icon with gentle float */}
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full bg-red-50 dark:bg-red-900/20 empty-state-float">
               <svg
                 className="h-10 w-10 text-red-500"
                 viewBox="0 0 24 24"
@@ -93,7 +93,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
                 <summary className="cursor-pointer text-xs text-slate-400 hover:text-slate-600 transition-colors">
                   View error details
                 </summary>
-                <pre className="mt-2 max-h-40 overflow-auto rounded-lg bg-slate-100 dark:bg-slate-800 p-3 text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap break-words">
+                <pre className="mt-2 max-h-40 overflow-auto rounded-xl bg-slate-100 dark:bg-slate-800 p-3 text-xs text-red-600 dark:text-red-400 whitespace-pre-wrap break-words custom-scrollbar">
                   {this.state.error?.stack}
                   {'\n\nComponent Stack:\n'}
                   {this.state.errorInfo.componentStack}
@@ -105,7 +105,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             <div className="flex items-center justify-center gap-3">
               <button
                 onClick={this.handleTryAgain}
-                className="inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-500 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
+                className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-emerald-500 transition-colors shadow-sm shadow-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
               >
                 <svg
                   className="h-4 w-4"
@@ -125,7 +125,7 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
               </button>
               <button
                 onClick={this.handleGoHome}
-                className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
+                className="inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 px-5 py-2.5 text-sm font-medium text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2"
               >
                 <svg
                   className="h-4 w-4"
@@ -144,9 +144,14 @@ class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
             </div>
 
             {/* ARWA branding */}
-            <p className="mt-8 text-xs text-slate-300 dark:text-slate-600">
-              ARWA LOGISTICS
-            </p>
+            <div className="mt-8 flex items-center justify-center gap-2">
+              <div className="w-5 h-5 bg-gradient-to-br from-emerald-400 to-emerald-600 rounded-md flex items-center justify-center">
+                <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
+                </svg>
+              </div>
+              <span className="text-xs text-slate-300 dark:text-slate-600 font-medium tracking-wider">ARWA LOGISTICS</span>
+            </div>
           </div>
         </div>
       );

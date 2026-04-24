@@ -1199,3 +1199,428 @@ select {
   white-space: normal;
   word-break: break-word;
 }
+
+/* ═══════════════════════════════════════════════════════════
+   V2 UI/UX ENHANCEMENTS — Polished Micro-Interactions
+   ═══════════════════════════════════════════════════════════ */
+
+/* ─── Animated Brand Loader ─────────────────────────────── */
+@keyframes loader-pulse-ring {
+  0% { transform: scale(0.8); opacity: 0.5; }
+  50% { transform: scale(1.2); opacity: 0; }
+  100% { transform: scale(0.8); opacity: 0; }
+}
+
+.brand-loader-ring {
+  animation: loader-pulse-ring 1.5s ease-out infinite;
+}
+
+@keyframes loader-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+
+.brand-loader-icon {
+  animation: loader-bounce 1s ease-in-out infinite;
+}
+
+/* ─── Welcome Banner Gradient Flow ──────────────────────── */
+.gradient-flow {
+  background-size: 300% 300%;
+  animation: gradient-flow 6s ease infinite;
+}
+
+@keyframes gradient-flow {
+  0% { background-position: 0% 50%; }
+  25% { background-position: 50% 100%; }
+  50% { background-position: 100% 50%; }
+  75% { background-position: 50% 0%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ─── Stat Card Number Counter Animation ────────────────── */
+@keyframes countUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.stat-number-enter {
+  animation: countUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ─── Enhanced Sidebar Nav Item Hover ───────────────────── */
+.sidebar-nav-item {
+  position: relative;
+  overflow: hidden;
+}
+
+.sidebar-nav-item::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, rgba(16, 185, 129, 0.08), transparent);
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+.sidebar-nav-item:hover::before {
+  opacity: 1;
+}
+
+[dir="rtl"] .sidebar-nav-item::before {
+  background: linear-gradient(-90deg, rgba(16, 185, 129, 0.08), transparent);
+}
+
+/* ─── Better Bottom Nav Active Indicator ────────────────── */
+.bottom-nav-active-indicator {
+  position: relative;
+}
+
+.bottom-nav-active-indicator::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 24px;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 0 0 3px 3px;
+  animation: scaleIn 200ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Card Shine Effect on Hover ────────────────────────── */
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-shine::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent 40%,
+    rgba(16, 185, 129, 0.03) 45%,
+    rgba(16, 185, 129, 0.06) 50%,
+    rgba(16, 185, 129, 0.03) 55%,
+    transparent 60%
+  );
+  transform: translateX(-100%);
+  transition: none;
+}
+
+.card-shine:hover::after {
+  transform: translateX(100%);
+  transition: transform 0.6s ease;
+}
+
+/* ─── Shipment Status Flow Line Animation ───────────────── */
+.status-flow-line {
+  position: relative;
+  overflow: hidden;
+}
+
+.status-flow-line::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: inherit;
+  animation: flow-fill 1.2s ease-out forwards;
+}
+
+@keyframes flow-fill {
+  to { width: 100%; }
+}
+
+[dir="rtl"] .status-flow-line::after {
+  left: auto;
+  right: 0;
+  animation-name: flow-fill-rtl;
+}
+
+@keyframes flow-fill-rtl {
+  to { width: 100%; }
+}
+
+/* ─── Enhanced Empty State with Gentle Float ────────────── */
+.empty-state-float {
+  animation: empty-float 3s ease-in-out infinite;
+}
+
+@keyframes empty-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+/* ─── Hero Section Animated Mesh Gradient ───────────────── */
+.hero-mesh-gradient {
+  background:
+    radial-gradient(at 20% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 50%),
+    radial-gradient(at 80% 20%, rgba(6, 182, 212, 0.1) 0%, transparent 50%),
+    radial-gradient(at 50% 50%, rgba(16, 185, 129, 0.05) 0%, transparent 70%);
+  animation: mesh-shift 12s ease-in-out infinite;
+}
+
+@keyframes mesh-shift {
+  0%, 100% {
+    background-position: 20% 80%, 80% 20%, 50% 50%;
+  }
+  33% {
+    background-position: 80% 80%, 20% 50%, 60% 30%;
+  }
+  66% {
+    background-position: 50% 20%, 60% 80%, 30% 60%;
+  }
+}
+
+/* ─── Smooth Table Row Click Feedback ───────────────────── */
+.table-row-clickable {
+  cursor: pointer;
+  transition: background-color 150ms ease, box-shadow 150ms ease;
+}
+
+.table-row-clickable:hover {
+  background-color: rgba(16, 185, 129, 0.04);
+}
+
+.table-row-clickable:active {
+  background-color: rgba(16, 185, 129, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(16, 185, 129, 0.1);
+}
+
+.dark .table-row-clickable:hover {
+  background-color: rgba(52, 211, 153, 0.06);
+}
+
+.dark .table-row-clickable:active {
+  background-color: rgba(52, 211, 153, 0.1);
+}
+
+/* ─── Header Sticky Shadow on Scroll ────────────────────── */
+.header-scrolled {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
+.dark .header-scrolled {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+/* ─── Form Field Group Styling ──────────────────────────── */
+.form-group {
+  position: relative;
+}
+
+.form-group label {
+  transition: color 200ms ease, transform 200ms ease;
+}
+
+.form-group:focus-within label {
+  color: #10b981;
+}
+
+.dark .form-group:focus-within label {
+  color: #34d399;
+}
+
+/* ─── Quick Action Card Pulse Border ────────────────────── */
+.quick-action-pulse {
+  position: relative;
+}
+
+.quick-action-pulse::after {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  background: linear-gradient(135deg, #10b981, #059669, #0d9488, #10b981);
+  background-size: 300% 300%;
+  z-index: -1;
+  opacity: 0;
+  animation: gradient-flow 4s ease infinite;
+  transition: opacity 200ms ease;
+}
+
+.quick-action-pulse:hover::after {
+  opacity: 1;
+}
+
+/* ─── Scroll Reveal Animation ───────────────────────────── */
+.reveal-up {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.reveal-up.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Better Mobile Touch Feedback ──────────────────────── */
+@media (max-width: 768px) {
+  .touch-feedback:active {
+    transform: scale(0.96);
+    transition: transform 100ms ease;
+  }
+}
+
+/* ─── Notification Slide In ─────────────────────────────── */
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.notification-slide-in {
+  animation: slideInRight 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ─── Smooth Breadcrumb Transition ──────────────────────── */
+.breadcrumb-item {
+  transition: color 150ms ease;
+}
+
+.breadcrumb-item:hover {
+  color: #10b981;
+}
+
+/* ─── Dashboard Section Divider ─────────────────────────── */
+.section-divider {
+  position: relative;
+}
+
+.section-divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(16, 185, 129, 0.2), transparent);
+}
+
+/* ─── Enhanced Tag/Badge Hover ──────────────────────────── */
+.badge-hover {
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+
+.badge-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+/* ─── Page Content Fade In ──────────────────────────────── */
+@keyframes contentFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.content-fade-in {
+  animation: contentFadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+}
+
+/* ─── Icon Button Subtle Scale ──────────────────────────── */
+.icon-btn-hover {
+  transition: transform 150ms ease, background-color 150ms ease;
+}
+
+.icon-btn-hover:hover {
+  transform: scale(1.08);
+}
+
+.icon-btn-hover:active {
+  transform: scale(0.95);
+}
+
+/* ─── Landing Page Decorative Line ──────────────────────── */
+.decorative-line {
+  position: relative;
+}
+
+.decorative-line::after {
+  content: '';
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(90deg, #10b981, #059669);
+  border-radius: 2px;
+}
+
+/* ─── Shimmer Loading for Images ────────────────────────── */
+.img-shimmer {
+  background: linear-gradient(
+    110deg,
+    var(--muted) 8%,
+    rgba(16, 185, 129, 0.08) 18%,
+    var(--muted) 33%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s linear infinite;
+}
+
+/* ─── Enhanced Skeleton with Rounded Shapes ─────────────── */
+.skeleton-rounded {
+  border-radius: 0.5rem;
+  background: var(--muted);
+  position: relative;
+  overflow: hidden;
+}
+
+.skeleton-rounded::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    rgba(16, 185, 129, 0.05) 50%,
+    transparent 100%
+  );
+  animation: shimmer-sweep 1.5s ease-in-out infinite;
+}
+
+/* ─── Confirmation Dialog Backdrop ──────────────────────── */
+.dialog-backdrop {
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* ─── Subtle Ambient Animation for Dashboard ────────────── */
+@keyframes ambient-glow {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+}
+
+.ambient-glow {
+  animation: ambient-glow 4s ease-in-out infinite;
+}
+
+/* ─── Better Keyboard Navigation Focus ──────────────────── */
+.keyboard-focus *:focus-visible {
+  outline: 2px solid #10b981;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
