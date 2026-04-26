@@ -67,9 +67,11 @@ export async function rateLimit(
 ): Promise<NextResponse | null> {
   // Try Redis-based rate limiting first
   try {
-    const { redis } = await import('./redis');
-    if (redis.status === 'ready' || redis.status === 'connecting' || redis.status === 'connect') {
-      return await rateLimitMiddleware(request, options);
+    const { isRedisReady } = await import('./redis');
+    if (isRedisReady()) {
+      const result = await rateLimitMiddleware(request, options);
+      if (result !== null) return result; // Rate limited
+      return null; // Allowed
     }
   } catch {
     // Redis not available, fall through to in-memory

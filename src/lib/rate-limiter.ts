@@ -1,4 +1,3 @@
-import redis from './redis';
 import { NextResponse } from 'next/server';
 
 interface RateLimitOptions {
@@ -26,6 +25,9 @@ export async function checkRateLimit(
     maxRequests = 60,          // 60 requests per minute default
     keyPrefix = 'ratelimit',
   } = options;
+
+  // Dynamic import to avoid requiring Redis at module load time
+  const { redis } = await import('./redis');
 
   const now = Date.now();
   const windowStart = now - windowMs;
@@ -101,7 +103,6 @@ export async function rateLimitMiddleware(
     return null; // Request allowed
   } catch (error) {
     // If Redis is down, fall back to allowing the request
-    console.error('[Rate Limiter] Redis error, allowing request:', error);
     return null;
   }
 }

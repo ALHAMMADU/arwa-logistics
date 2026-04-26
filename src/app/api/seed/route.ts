@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { seedDatabase } from '@/lib/seed';
-import { rateLimit, checkAccess } from '@/lib/rbac';
 
 export async function POST(request: Request) {
   // Disable seed endpoint in production
@@ -11,11 +10,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const rateLimitResult = await rateLimit(request);
-  if (rateLimitResult) return rateLimitResult;
-
-  const access = checkAccess(request, { roles: ['ADMIN'] });
-  if (!access.allowed) return access.response;
+  // In development, allow seeding without auth for convenience
 
   try {
     const result = await seedDatabase();

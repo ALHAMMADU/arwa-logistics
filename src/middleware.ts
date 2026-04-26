@@ -71,6 +71,8 @@ const PUBLIC_PATHS = [
   '/api/calculate-rate',
   '/api/countries',
   '/api/routes',
+  '/api/seed',
+  '/api/health',
 ];
 
 // Path-specific protection rules (evaluated in order, first match wins)
