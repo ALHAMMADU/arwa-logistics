@@ -63,4 +63,4 @@ db/*.db
 /download/
 
 # Worklog
-worklog.md
+worklog.md.github/workflows/
