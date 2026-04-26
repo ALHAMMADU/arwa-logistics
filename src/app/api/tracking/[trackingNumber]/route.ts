@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { rateLimit, checkAccess, createAuditLog, getClientIp } from '@/lib/rbac';
 
 export async function GET(request: Request, { params }: { params: Promise<{ trackingNumber: string }> }) {
-  const rateLimitResult = rateLimit(request, { windowMs: 60 * 1000, maxRequests: 30 });
+  const rateLimitResult = await rateLimit(request, { windowMs: 60 * 1000, maxRequests: 30 });
   if (rateLimitResult) return rateLimitResult;
 
   try {

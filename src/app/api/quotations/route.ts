@@ -5,7 +5,7 @@ import { rateLimit, checkAccess, createAuditLog, getClientIp } from '@/lib/rbac'
 // POST: Create a new quotation request
 export async function POST(request: Request) {
   try {
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     const access = checkAccess(request);
@@ -107,7 +107,7 @@ export async function POST(request: Request) {
 // GET: List quotations with filters
 export async function GET(request: Request) {
   try {
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     const access = checkAccess(request);

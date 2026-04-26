@@ -5,7 +5,7 @@ import { rateLimit, checkAccess } from '@/lib/rbac';
 // GET /api/notifications - Get notifications for the authenticated user
 export async function GET(request: Request) {
   try {
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     const access = checkAccess(request);
@@ -53,7 +53,7 @@ export async function GET(request: Request) {
 // POST /api/notifications - Create a notification (ADMIN only)
 export async function POST(request: Request) {
   try {
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     const access = checkAccess(request, { roles: ['ADMIN'] });

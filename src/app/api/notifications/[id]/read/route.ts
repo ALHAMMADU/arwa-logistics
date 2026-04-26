@@ -8,7 +8,7 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     const access = checkAccess(request);

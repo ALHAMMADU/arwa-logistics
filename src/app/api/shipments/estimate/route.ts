@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { rateLimit, checkAccess } from '@/lib/rbac';
 
 export async function POST(request: Request) {
-  const rateLimitResult = rateLimit(request);
+  const rateLimitResult = await rateLimit(request);
   if (rateLimitResult) return rateLimitResult;
 
   const access = checkAccess(request);

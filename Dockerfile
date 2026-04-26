@@ -12,7 +12,10 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+
+# Generate Prisma client for PostgreSQL
 RUN npx prisma generate
+
 RUN npm run build
 
 # Production image
@@ -29,8 +32,11 @@ COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
-# Create data directory for SQLite
-RUN mkdir -p /app/data && chown nextjs:nodejs /app/data
+# Environment variables (overridden at runtime by docker-compose / orchestration)
+ENV DATABASE_URL="postgresql://arwa:arwa_secret_2026@postgres:5432/arwa_logistics?schema=public"
+ENV REDIS_URL="redis://redis:6379"
+ENV RABBITMQ_URL="amqp://arwa:arwa_rabbitmq_2026@rabbitmq:5672"
+ENV JWT_SECRET="arwa-jwt-secret-key-2026-production-change-me"
 
 USER nextjs
 

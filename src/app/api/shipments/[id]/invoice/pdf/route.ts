@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth';
 
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     // Authenticate via query param token (since this is opened in a new browser tab)

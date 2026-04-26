@@ -4,7 +4,7 @@ import { rateLimit, checkAccess } from '@/lib/rbac';
 
 export async function GET(request: Request) {
   try {
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     const access = checkAccess(request, { roles: ['ADMIN'] });

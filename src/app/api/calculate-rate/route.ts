@@ -3,7 +3,7 @@ import { db } from '@/lib/db';
 import { rateLimit, checkAccess } from '@/lib/rbac';
 
 export async function GET(request: Request) {
-  const rateLimitResult = rateLimit(request, { windowMs: 60 * 1000, maxRequests: 30 });
+  const rateLimitResult = await rateLimit(request, { windowMs: 60 * 1000, maxRequests: 30 });
   if (rateLimitResult) return rateLimitResult;
 
   // Rate calculator is available to authenticated users and also public (with limited data)

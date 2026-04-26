@@ -6,7 +6,7 @@ import { rateLimit, checkAccess, createAuditLog, getClientIp } from '@/lib/rbac'
 export async function GET(request: Request) {
   try {
     // Rate limiting
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     // Any authenticated user
@@ -44,7 +44,7 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   try {
     // Rate limiting
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     // Any authenticated user

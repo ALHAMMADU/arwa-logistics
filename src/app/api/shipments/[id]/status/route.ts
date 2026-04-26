@@ -7,7 +7,7 @@ import { sseEmitter } from '@/lib/event-emitter';
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Rate limiting
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     // ADMIN or WAREHOUSE_STAFF only

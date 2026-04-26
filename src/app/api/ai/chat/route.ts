@@ -26,7 +26,7 @@ Guidelines:
 export async function POST(request: Request) {
   try {
     // Rate limiting
-    const rateLimitResult = rateLimit(request, { windowMs: 60 * 1000, maxRequests: 30 });
+    const rateLimitResult = await rateLimit(request, { windowMs: 60 * 1000, maxRequests: 30 });
     if (rateLimitResult) return rateLimitResult;
 
     // Authentication check

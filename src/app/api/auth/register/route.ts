@@ -10,7 +10,7 @@ const MAX_NAME_LENGTH = 200;
 export async function POST(request: Request) {
   try {
     // Rate limiting (public endpoint)
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     const body = await request.json();

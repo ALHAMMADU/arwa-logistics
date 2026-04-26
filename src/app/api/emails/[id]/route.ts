@@ -5,7 +5,7 @@ import { rateLimit, checkAccess } from '@/lib/rbac';
 // GET: Get email log detail (ADMIN only)
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     const access = checkAccess(request, { roles: ['ADMIN'] });

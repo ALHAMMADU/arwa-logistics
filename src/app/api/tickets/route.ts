@@ -22,7 +22,7 @@ async function getNextTicketId(): Promise<string> {
 // GET /api/tickets - List tickets
 export async function GET(request: Request) {
   try {
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     const access = checkAccess(request);
@@ -86,7 +86,7 @@ export async function GET(request: Request) {
 // POST /api/tickets - Create ticket
 export async function POST(request: Request) {
   try {
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     const access = checkAccess(request);

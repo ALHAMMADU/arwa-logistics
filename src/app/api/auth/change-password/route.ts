@@ -8,7 +8,7 @@ import { sendPasswordChangeEmail } from '@/lib/email';
 export async function POST(request: Request) {
   try {
     // Rate limiting
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     // Any authenticated user

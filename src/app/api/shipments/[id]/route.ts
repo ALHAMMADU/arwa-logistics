@@ -5,7 +5,7 @@ import { rateLimit, checkAccess, createAuditLog, getClientIp } from '@/lib/rbac'
 export async function GET(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Rate limiting
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     // Any authenticated user (ownership check below)
@@ -44,7 +44,7 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   try {
     // Rate limiting
-    const rateLimitResult = rateLimit(request);
+    const rateLimitResult = await rateLimit(request);
     if (rateLimitResult) return rateLimitResult;
 
     // Any authenticated user (ownership check below)

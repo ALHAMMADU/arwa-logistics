@@ -7,7 +7,7 @@ import crypto from 'crypto';
 export async function POST(request: Request) {
   try {
     // Rate limiting (public endpoint - stricter limit)
-    const rateLimitResult = rateLimit(request, { maxRequests: 5, windowMs: 60 * 1000 });
+    const rateLimitResult = await rateLimit(request, { maxRequests: 5, windowMs: 60 * 1000 });
     if (rateLimitResult) return rateLimitResult;
 
     const body = await request.json();

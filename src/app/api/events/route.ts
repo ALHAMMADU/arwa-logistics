@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export async function GET(request: Request) {
   // Rate limiting
-  const rateLimitResult = rateLimit(request);
+  const rateLimitResult = await rateLimit(request);
   if (rateLimitResult) return rateLimitResult;
 
   // Check authentication - support both header and query param token

@@ -1,0 +1,107 @@
+version: "3.9"
+
+services:
+  # ─── PostgreSQL 16 ─────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: arwa_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-arwa}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-arwa_secret_2026}
+      POSTGRES_DB: ${POSTGRES_DB:-arwa_logistics}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-arwa} -d ${POSTGRES_DB:-arwa_logistics}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - app-network
+
+  # ─── Redis 7 ───────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: arwa_redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-arwa_redis_2026}
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-arwa_redis_2026}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    networks:
+      - app-network
+
+  # ─── RabbitMQ 3 Management ────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: arwa_rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-arwa}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-arwa_rabbitmq_2026}
+    ports:
+      - "${RABBITMQ_PORT:-5672}:5672"
+      - "${RABBITMQ_MGMT_PORT:-15672}:15672"
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+    networks:
+      - app-network
+
+  # ─── ARWA LOGISTICS App ───────────────────────────────
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: arwa_app
+    restart: unless-stopped
+    ports:
+      - "${APP_PORT:-3000}:3000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-arwa}:${POSTGRES_PASSWORD:-arwa_secret_2026}@postgres:5432/${POSTGRES_DB:-arwa_logistics}?schema=public
+      REDIS_URL: redis://:${REDIS_PASSWORD:-arwa_redis_2026}@redis:6379
+      RABBITMQ_URL: amqp://${RABBITMQ_USER:-arwa}:${RABBITMQ_PASSWORD:-arwa_rabbitmq_2026}@rabbitmq:5672
+      JWT_SECRET: ${JWT_SECRET:-arwa-jwt-secret-key-2026-production-change-me}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - app-network
+
+# ─── Networks ──────────────────────────────────────────
+networks:
+  app-network:
+    driver: bridge
+    name: arwa-network
+
+# ─── Volumes ───────────────────────────────────────────
+volumes:
+  postgres-data:
+    name: arwa_postgres_data
+  redis-data:
+    name: arwa_redis_data
+  rabbitmq-data:
+    name: arwa_rabbitmq_data

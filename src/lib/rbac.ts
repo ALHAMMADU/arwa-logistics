@@ -1,5 +1,6 @@
 import { getSession } from './auth';
 import { NextResponse } from 'next/server';
+import { rateLimitMiddleware, RATE_LIMIT_TIERS } from './rate-limiter';
 
 export type Role = 'ADMIN' | 'CUSTOMER' | 'WAREHOUSE_STAFF';
 
@@ -7,7 +8,7 @@ export interface RBACOptions {
   roles?: Role[];
 }
 
-// Simple in-memory rate limiting store with periodic cleanup
+// In-memory fallback store for when Redis is unavailable
 const rateLimitStore = new Map<string, { count: number; resetTime: number }>();
 
 // Periodic cleanup of expired rate limit entries (every 5 minutes)
@@ -57,12 +58,24 @@ export function checkAccess(
 
 /**
  * Rate limiting middleware - returns null if allowed, NextResponse if rate limited
+ * Uses Redis-based sliding window with in-memory fallback
  * Uses pathname only (not full URL) to prevent bypass via query params
  */
-export function rateLimit(
+export async function rateLimit(
   request: Request,
   options?: { windowMs?: number; maxRequests?: number }
-): NextResponse | null {
+): Promise<NextResponse | null> {
+  // Try Redis-based rate limiting first
+  try {
+    const { redis } = await import('./redis');
+    if (redis.status === 'ready' || redis.status === 'connecting' || redis.status === 'connect') {
+      return await rateLimitMiddleware(request, options);
+    }
+  } catch {
+    // Redis not available, fall through to in-memory
+  }
+
+  // In-memory fallback (existing implementation)
   const windowMs = options?.windowMs || 60 * 1000; // 1 minute
   const maxRequests = options?.maxRequests || 60; // 60 requests per minute
 
@@ -136,3 +149,6 @@ export async function createAuditLog(data: {
     console.error('Failed to create audit log:', error);
   }
 }
+
+// Re-export rate limit tiers for convenience
+export { RATE_LIMIT_TIERS };
