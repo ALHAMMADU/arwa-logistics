@@ -63,4 +63,7 @@ db/*.db
 /download/
 
 # Worklog
-worklog.md.github/workflows/
+worklog.md
+
+# GitHub workflows (push via GitHub UI or token with workflow scope)
+.github/workflows/
