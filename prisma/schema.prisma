@@ -450,3 +450,41 @@ model Quotation {
   @@index([createdAt])
   @@map("quotations")
 }
+
+// ─── WEBHOOKS ────────────────────────────────────────────
+
+model WebhookEndpoint {
+  id          String   @id @default(cuid())
+  name        String
+  url         String
+  secret      String   // HMAC secret for signing payloads
+  events      String   // JSON array of event types: ["shipment.created","payment.completed",...]
+  active      Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  deliveries  WebhookDelivery[]
+
+  @@index([active])
+  @@map("webhook_endpoints")
+}
+
+model WebhookDelivery {
+  id            String   @id @default(cuid())
+  webhookId     String
+  event         String
+  payload       String   // JSON string of the payload
+  statusCode    Int?     // HTTP response code from the endpoint
+  response      String?  // Response body (truncated)
+  success       Boolean  @default(false)
+  attempts      Int      @default(1)
+  nextRetryAt   DateTime?
+  createdAt     DateTime @default(now())
+
+  webhook       WebhookEndpoint @relation(fields: [webhookId], references: [id], onDelete: Cascade)
+
+  @@index([webhookId])
+  @@index([success])
+  @@index([createdAt])
+  @@map("webhook_deliveries")
+}

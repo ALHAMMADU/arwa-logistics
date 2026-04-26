@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   output: "standalone",
   poweredByHeader: false,
-  serverExternalPackages: ["pg", "pg-native"],
+  serverExternalPackages: ["pg", "pg-native", "stripe", "nodemailer"],
   async headers() {
     return [
       {

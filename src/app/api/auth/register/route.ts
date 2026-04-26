@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { hashPassword, generateToken } from '@/lib/auth';
 import { rateLimit, createAuditLog, getClientIp } from '@/lib/rbac';
 import { sendWelcomeEmail } from '@/lib/email';
+import { setCookie } from '@/lib/cookies';
 
 const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const MAX_NAME_LENGTH = 200;
@@ -84,9 +85,14 @@ export async function POST(request: Request) {
       success: true,
       data: {
         user: { id: user.id, email: user.email, name: user.name, role: user.role, phone: user.phone, company: user.company },
-        token,
+        token, // Keep token in response for backward compatibility
       },
-    }, { status: 201 });
+    }, {
+      status: 201,
+      headers: {
+        'Set-Cookie': setCookie(token),
+      },
+    });
   } catch (error: any) {
     console.error('API Error:', error);
     return NextResponse.json({ success: false, error: 'Internal server error' }, { status: 500 });

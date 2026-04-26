@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { verifyPassword, hashPassword, needsRehash, generateToken } from '@/lib/auth';
 import { rateLimit, createAuditLog, getClientIp } from '@/lib/rbac';
+import { setCookie } from '@/lib/cookies';
 
 // Dummy hash for timing attack prevention — always perform bcrypt comparison
 const DUMMY_HASH = '$2a$12$AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA';
@@ -64,7 +65,11 @@ export async function POST(request: Request) {
       success: true,
       data: {
         user: { id: user.id, email: user.email, name: user.name, role: user.role, phone: user.phone, company: user.company },
-        token,
+        token, // Keep token in response for backward compatibility with mobile/API clients
+      },
+    }, {
+      headers: {
+        'Set-Cookie': setCookie(token),
       },
     });
   } catch (error: any) {

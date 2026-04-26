@@ -178,16 +178,33 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Extract JWT from Authorization header
-  const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) {
+  // Extract JWT from cookie or Authorization header
+  let token: string | null = null;
+
+  // Try cookie first
+  const cookieHeader = request.headers.get('cookie');
+  if (cookieHeader) {
+    const cookies = Object.fromEntries(
+      cookieHeader.split(';').map(c => { const [k, ...v] = c.trim().split('='); return [k, v.join('=')]; })
+    );
+    token = cookies['arwa_session'] || null;
+  }
+
+  // Fallback to Authorization header
+  if (!token) {
+    const authHeader = request.headers.get('Authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      token = authHeader.substring(7);
+    }
+  }
+
+  if (!token) {
     return NextResponse.json(
       { success: false, error: 'Authentication required' },
       { status: 401 }
     );
   }
 
-  const token = authHeader.substring(7);
   const payload = await verifyTokenEdge(token);
 
   if (!payload) {

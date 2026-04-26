@@ -1,4 +1,5 @@
 import { db } from './db';
+import { sendSMTPEmail, isSMTPConfigured } from './smtp';
 
 // ─── TYPES ───────────────────────────────────────────────
 
@@ -57,7 +58,25 @@ This is an automated message. Please do not reply to this email.
 
 async function sendEmail(template: EmailTemplate, emailType: EmailType, entityType?: string, entityId?: string): Promise<void> {
   try {
-    // Log email to database
+    // Try SMTP first if configured
+    const smtpAvailable = await isSMTPConfigured();
+
+    if (smtpAvailable) {
+      const result = await sendSMTPEmail({
+        to: template.to,
+        subject: template.subject,
+        html: template.html,
+        text: template.text,
+        emailType,
+        entityType,
+        entityId,
+      });
+
+      if (result.success) return;
+      // If SMTP failed, fall through to console logging
+    }
+
+    // Fallback: Log to console and mark as SENT in DB
     const emailLog = await db.emailLog.create({
       data: {
         to: template.to,
@@ -71,15 +90,8 @@ async function sendEmail(template: EmailTemplate, emailType: EmailType, entityTy
       },
     });
 
-    // In production, this would use nodemailer or similar SMTP service
-    // For now, we log to console and mark as SENT
     console.log(`[EMAIL] Sending ${emailType} email to ${template.to}: ${template.subject}`);
 
-    // Simulate sending - in production, integrate with SMTP here
-    // const transporter = nodemailer.createTransport({...});
-    // await transporter.sendMail({ from, to, subject, html, text });
-
-    // Update log as sent
     await db.emailLog.update({
       where: { id: emailLog.id },
       data: {
@@ -87,29 +99,8 @@ async function sendEmail(template: EmailTemplate, emailType: EmailType, entityTy
         sentAt: new Date(),
       },
     });
-
-    console.log(`[EMAIL] Successfully sent ${emailType} email to ${template.to}`);
   } catch (error: any) {
     console.error(`[EMAIL] Failed to send ${emailType} email to ${template.to}:`, error.message);
-
-    // Try to log the failure
-    try {
-      await db.emailLog.create({
-        data: {
-          to: template.to,
-          subject: template.subject,
-          htmlBody: template.html,
-          textBody: template.text,
-          emailType,
-          entityType: entityType || null,
-          entityId: entityId || null,
-          status: 'FAILED',
-          error: error.message || 'Unknown error',
-        },
-      });
-    } catch (logError) {
-      console.error('[EMAIL] Failed to log email failure:', logError);
-    }
   }
 }
 

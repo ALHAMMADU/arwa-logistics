@@ -1,6 +1,9 @@
 import crypto from 'crypto';
 import bcrypt from 'bcryptjs';
 
+// ─── Cookie Name for HttpOnly session ─────────────────────
+export const COOKIE_NAME = 'arwa_session';
+
 function getJwtSecret(): string {
   const secret = process.env.JWT_SECRET;
   if (!secret) {
@@ -71,10 +74,27 @@ export function verifyToken(token: string): TokenPayload | null {
 }
 
 export function getSession(request: Request): TokenPayload | null {
+  // Try cookie first (HttpOnly cookie - preferred)
+  const cookieHeader = request.headers.get('cookie');
+  if (cookieHeader) {
+    const cookies = Object.fromEntries(
+      cookieHeader.split(';').map(c => { const [k, ...v] = c.trim().split('='); return [k, v.join('=')]; })
+    );
+    const token = cookies[COOKIE_NAME];
+    if (token) {
+      const payload = verifyToken(token);
+      if (payload) return payload;
+    }
+  }
+
+  // Fallback to Authorization header (for API clients)
   const authHeader = request.headers.get('Authorization');
-  if (!authHeader?.startsWith('Bearer ')) return null;
-  const token = authHeader.substring(7);
-  return verifyToken(token);
+  if (authHeader?.startsWith('Bearer ')) {
+    const token = authHeader.substring(7);
+    return verifyToken(token);
+  }
+
+  return null;
 }
 
 export function requireAuth(request: Request, roles?: string[]): TokenPayload | { error: string; status: number } {
